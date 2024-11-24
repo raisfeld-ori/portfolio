@@ -42,79 +42,80 @@ export const metadata = {
 export default function Uses() {
   return (
     <SimpleLayout
-      title="Software I use, gadgets I love, and other things I recommend."
-      intro="I get asked a lot about the things I use to build software, stay productive, or buy to fool myself into thinking I’m being productive when I’m really just procrastinating. Here’s a big list of all of my favorite stuff."
+      title="My favorite tools."
+      intro="I get asked a lot about my favorite frameworks, my most used tools, and stuff like that. so here's my favorite and most used tools of all time."
     >
       <div className="space-y-20">
-        <ToolsSection title="Workstation">
-          <Tool title="16” MacBook Pro, M1 Max, 64GB RAM (2021)">
-            I was using an Intel-based 16” MacBook Pro prior to this and the
-            difference is night and day. I’ve never heard the fans turn on a
-            single time, even under the incredibly heavy loads I put it through
-            with our various launch simulations.
+        <ToolsSection title="General tools">
+          <Tool title="Windows 11 / Linux-Manjaro / Linux-Debian">
+            I have been using linux and linux, and never felt any reason to move to any other operating systems.
+            Windows 11 is mediocare, but it can run basically anything I want, which makes it useful for day-to-day usage.
+            Manjaro is a great arch based operating system, and my favorite linux distro.
+            Debian isa close second, but unlike manjaro, it's more stable and more secure, yet not as flexible as Manjaro.
           </Tool>
-          <Tool title="Apple Pro Display XDR (Standard Glass)">
-            The only display on the market if you want something HiDPI and
-            bigger than 27”. When you’re working at planetary scale, every pixel
-            you can get counts.
+          <Tool title="Visual Studio Code">
+            My most used code editor. very useful for general purpose programming. I used it for learning new language,
+            and I used it for making large scale products, it truly works everywhere, for any language, and always gives
+            the same simple and consistent experience.
           </Tool>
-          <Tool title="IBM Model M SSK Industrial Keyboard">
-            They don’t make keyboards the way they used to. I buy these any time
-            I see them go up for sale and keep them in storage in case I need
-            parts or need to retire my main.
+          <Tool title="Neovim">
+            Unlike Vscode, this is a less used tool of mine, but still a very useful one.
+            It's useful as a lightwheight editor that works anywhere from a large computer to a miniature
+            mobile phone. It's great for smaller projects/
           </Tool>
-          <Tool title="Apple Magic Trackpad">
-            Something about all the gestures makes me feel like a wizard with
-            special powers. I really like feeling like a wizard with special
-            powers.
-          </Tool>
-          <Tool title="Herman Miller Aeron Chair">
-            If I’m going to slouch in the worst ergonomic position imaginable
-            all day, I might as well do it in an expensive chair.
+          <Tool title="Jetbrains products">
+            this is my most spesific list of tools. Unlike neovim and vscode, every
+            jetbrains product only fits one programming language and requires a very strong
+            computer to use properly. however, when the situation is right, a Jetbrains product can be
+            one of the best IDEs you can get.
           </Tool>
         </ToolsSection>
         <ToolsSection title="Development tools">
-          <Tool title="Sublime Text 4">
-            I don’t care if it’s missing all of the fancy IDE features everyone
-            else relies on, Sublime Text is still the best text editor ever
-            made.
+          <Tool title="Tauri">
+            It's a framework that makes it easy to build cross-platform apps with Rust and React, what
+            more can I say? Now that it supports Android and IOS, It's become my #1 most used development
+            tool for app and mobile development.
           </Tool>
-          <Tool title="iTerm2">
-            I’m honestly not even sure what features I get with this that aren’t
-            just part of the macOS Terminal but it’s what I use.
+          <Tool title="Expo">
+            Whenever Tauri isn't enough, and I need more control and performance, I use React native with expo.
+            as simple as that. it's a great tool, but it's not good at making websites, 
+            so React is still better than React Native for any other case. also, Expo takes the process of making
+            an android/IOS app and simplifies it a lot, I love that tool.
           </Tool>
-          <Tool title="TablePlus">
-            Great software for working with databases. Has saved me from
-            building about a thousand admin interfaces for my various projects
-            over the years.
+          <Tool title="Firebase">
+            Whenever I have to make a simple backend, without the need for something complex, I usually
+            use Firebase. It's very simple to use, and it's very easy to get started.
+          </Tool>
+          <Tool title="React">
+            I tried multiple frameworks, from Qt to Angular to Svelte, but none of them felt
+            like I could create UI without wasting a ton of times on non-UI related things.
+            That is, until I met react. It's my #1 used framework of all time.
+          </Tool>
+          <Tool title="Nextjs">
+            Although not as useful as React, Nextjs is also good for making websites like this.
+            It has every benefit of React, but also a couple good (and bad) featires alongside it.
+            I usually use it for large scale websites, but it can be used for small projects as well.
           </Tool>
         </ToolsSection>
-        <ToolsSection title="Design">
-          <Tool title="Figma">
-            We started using Figma as just a design tool but now it’s become our
-            virtual whiteboard for the entire company. Never would have expected
-            the collaboration features to be the real hook.
+        <ToolsSection title="Languages">
+          <Tool title="Python">
+            A simple, abstract programming language that allows making very complicated things without
+            requiring a lot of effort. It's useful for most scenarios, unless I need to do something more complicated.
           </Tool>
-        </ToolsSection>
-        <ToolsSection title="Productivity">
-          <Tool title="Alfred">
-            It’s not the newest kid on the block but it’s still the fastest. The
-            Sublime Text of the application launcher world.
+          <Tool title="Rust">
+            The opposite of python. It's a complicated, low level programming language that gives a lot of control over
+            the system, in return for a lot of effort. It's useful for making very complicated things, but it's also good for
+            making things fast wihtout trying too hard.
           </Tool>
-          <Tool title="Reflect">
-            Using a daily notes system instead of trying to keep things
-            organized by topics has been super powerful for me. And with
-            Reflect, it’s still easy for me to keep all of that stuff
-            discoverable by topic even though all of my writing happens in the
-            daily note.
+          <Tool title="Java">
+            The opposite of python. It's a complicated, low level programming language that gives a lot of control over
+            the system, in return for a lot of effort. It's useful for making very complicated things, but it's also good for
+            making things fast wihtout trying too hard.
           </Tool>
-          <Tool title="SavvyCal">
-            Great tool for scheduling meetings while protecting my calendar and
-            making sure I still have lots of time for deep work during the week.
-          </Tool>
-          <Tool title="Focus">
-            Simple tool for blocking distracting websites when I need to just do
-            the work and get some momentum going.
+          <Tool title="Typescript">
+            The opposite of python. It's a complicated, low level programming language that gives a lot of control over
+            the system, in return for a lot of effort. It's useful for making very complicated things, but it's also good for
+            making things fast wihtout trying too hard.
           </Tool>
         </ToolsSection>
       </div>

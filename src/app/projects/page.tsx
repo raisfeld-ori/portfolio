@@ -3,46 +3,44 @@ import Image from 'next/image'
 
 import { Card } from '@/components/Card'
 import { SimpleLayout } from '@/components/SimpleLayout'
-import logoAnimaginary from '@/images/logos/animaginary.svg'
-import logoCosmos from '@/images/logos/cosmos.svg'
-import logoHelioStream from '@/images/logos/helio-stream.svg'
-import logoOpenShuttle from '@/images/logos/open-shuttle.svg'
-import logoPlanetaria from '@/images/logos/planetaria.svg'
+import logoAnimaginary from '@/images/logos/israir.jpg'
+import logoCosmos from '@/images/logos/diddy2.png';
+import logoHelioStream from '@/images/logos/whitepanther.jpg'
+import logoOpenShuttle from '@/images/logos/google.png'
+import logoPlanetaria from '@/images/logos/icon.png'
 
 const projects = [
   {
-    name: 'Planetaria',
+    name: 'Hibori',
     description:
-      'Creating technology to empower civilians to explore space on their own terms.',
-    link: { href: 'http://planetaria.tech', label: 'planetaria.tech' },
+      'Connecting Students to other students using shared hobbies and interests.',
+    link: { href: 'https://hiboridownloadplese.vercel.app/', label: 'download page' },
     logo: logoPlanetaria,
   },
   {
-    name: 'Animaginary',
+    name: 'Israir project',
     description:
-      'High performance web animation library, hand-written in optimized WASM.',
-    link: { href: '#', label: 'github.com' },
+      'A project made for Israir, intended for their internal use. (no download link)',
     logo: logoAnimaginary,
   },
   {
-    name: 'HelioStream',
+    name: 'Reality changing films site',
     description:
-      'Real-time video streaming library, optimized for interstellar transmission.',
-    link: { href: '#', label: 'github.com' },
+      'A custom website for the company reality changing films',
+    link: { href: 'https://reality-changing-films.vercel.app', label: 'reality-changing-films.vercel.app' },
     logo: logoHelioStream,
   },
   {
-    name: 'cosmOS',
+    name: 'ReadySetStores',
     description:
-      'The operating system that powers our Planetaria space shuttles.',
-    link: { href: '#', label: 'github.com' },
+      'A unique shop website with an admin page that allows the admin to completely design and customize the website',
+    link: { href: 'https://readysetstores.com/', label: 'readysetstores.com' },
     logo: logoCosmos,
   },
   {
-    name: 'OpenShuttle',
+    name: 'Google PDF editor',
     description:
-      'The schematics for the first rocket I designed that successfully made it to orbit.',
-    link: { href: '#', label: 'github.com' },
+      'A PDF editor made as part of the google mentoring program. (no download link)',
     logo: logoOpenShuttle,
   },
 ]
@@ -66,8 +64,8 @@ export const metadata: Metadata = {
 export default function Projects() {
   return (
     <SimpleLayout
-      title="Things I’ve made trying to put my dent in the universe."
-      intro="I’ve worked on tons of little projects over the years but these are the ones that I’m most proud of. Many of them are open-source, so if you see something that piques your interest, check out the code and contribute if you have ideas for how it can be improved."
+      title="My previous projects"
+      intro="Some of the many projects I made. most of the projects shown here were done for a company and/or under a client"
     >
       <ul
         role="list"
@@ -79,18 +77,18 @@ export default function Projects() {
               <Image
                 src={project.logo}
                 alt=""
-                className="h-8 w-8"
+                className="h-8 w-8 rounded-full"
                 unoptimized
               />
             </div>
             <h2 className="mt-6 text-base font-semibold text-zinc-800 dark:text-zinc-100">
-              <Card.Link href={project.link.href}>{project.name}</Card.Link>
+              <Card.Link href={project.link ? project.link.href : ""}>{project.name}</Card.Link>
             </h2>
             <Card.Description>{project.description}</Card.Description>
-            <p className="relative z-10 mt-6 flex text-sm font-medium text-zinc-400 transition group-hover:text-teal-500 dark:text-zinc-200">
+            {project.link && <p className="relative z-10 mt-6 flex text-sm font-medium text-zinc-400 transition group-hover:text-teal-500 dark:text-zinc-200">
               <LinkIcon className="h-6 w-6 flex-none" />
               <span className="ml-2">{project.link.label}</span>
-            </p>
+            </p>}
           </Card>
         ))}
       </ul>
