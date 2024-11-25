@@ -1,0 +1,66 @@
+import { ArticleLayout } from '@/components/ArticleLayout'
+
+export const article = {
+  author: 'Ori Raisfeld',
+  date: '2024-11-25',
+  title: 'Creating products in a week?!',
+  description: 'After finding a couple paid projects to make, I came across a difficult issue. Clients want products as fast as possible, and I had to release a solid product in has fast as possible.',
+}
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+}
+
+export default (props) => <ArticleLayout article={article} {...props} />
+
+This year, I had my first professional project, which was followed up by more and more.
+I wanted to talk about the most unique (and annoying) part I found when working with Clients: *showing results*.
+
+### Why is this difficult?
+
+"I already made multiple projects, I can easily just do the same and show the result" is what I thought when I started,
+but I soon realized that clients don't have any knowlage about coding, deployment, or even product management.
+When you work with clients, you need to show results **fast**. Sometimes this could take 3 months, sometimes a month,
+or sometimes even a week.
+
+## How can I make a good product in under a week?!
+
+this is a difficult task, and the simplest answer is: you can't. You can make a product quickly though using
+these 2 things:
+
+### Agile development
+
+>    Agile is also a mindset that influences how we choose to think and act. As agilists, we choose to:
+>    Accelerate our value realization by embracing worthwhile changes.
+>    Delight customers by taking a customer-centric view to our work.
+>    Improve group capability by proactively collaborating instead of working in functional silos.
+>    Improve predictably by refining our understanding of what is needed through regularly showing our work and acting on feedback.
+>    Optimize flow by working on small things instead of big things. Big things are accomplished incrementally as a series of small things.
+>    Keep workloads within capacity by finishing the things we work on instead of starting lots of things. This is called limiting work-in-process (WIP).
+>    Improve continuously by frequently learning from our experience and evolving our practices based on what we learned.
+>    Agility predictably, sustainably, and rapidly delivers high-quality value in a changing, complex environment.
+
+According to [pmi.org](https://www.pmi.org/disciplined-agile/agile/whatisagile).
+
+Basically, you move fast, and complete small tasks every time, until you end up with a final product.
+I personally found the methology to be better than any other I tried, and it's a key component of creating products
+this quickly.
+
+### Use pre-existing code
+
+This is something that's very difficult to properly do, but can ruin your skills if not done properly.
+Copying and reusing code isn't just doing CTRL+C -> CTRL+V, it requires you to understand the code,
+and to modify it to fit your code. otherwise, you're gonna come back to the code with no idea what it does,
+and you're gonna end up wasting far more time than you think on it.
+
+However, when done right, you can take weeks, if not months of work and do them in under a week, which is
+exactly what allows you to create good products like this.
+
+## conclusion
+When you start working with clients, you need to start coding fast. When working normally, you won't
+be able to show a complete result until a month passes by or so, and during that time, the client will think of you as
+lazy, and that you're not working.
+
+So learn how to move fast, plan quickly, and start using existing code instead of writing things from scratch (but still,
+don't just copy code, learn what it does). And you willl be able to make products in under a week.
