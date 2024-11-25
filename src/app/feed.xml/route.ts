@@ -3,15 +3,15 @@ import * as cheerio from 'cheerio'
 import { Feed } from 'feed'
 
 export async function GET(req: Request) {
-  let siteUrl = process.env.NEXT_PUBLIC_SITE_URL
+  let siteUrl = "https://oriraisfeld.vercel.app"
 
   if (!siteUrl) {
     throw Error('Missing NEXT_PUBLIC_SITE_URL environment variable')
   }
 
   let author = {
-    name: 'Spencer Sharp',
-    email: 'spencer@planetaria.tech',
+    name: 'Ori Raisfeld',
+    email: 'raisfeldori@gmail.com',
   }
 
   let feed = new Feed({
