@@ -1,0 +1,113 @@
+import { ArticleLayout } from '@/components/ArticleLayout'
+
+export const article = {
+  author: 'Ori Raisfeld',
+  date: '2024-11-28',
+  title: 'Faking a file system',
+  description: "In my old project, Ksed, I had to create my own version of the file system, that wouldn't interact with the regular file system. This is how I made it.",
+}
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+}
+
+export default (props) => <ArticleLayout article={article} {...props} />
+
+If you ask me what's the project that I'm the most proud of, it would probably be Ksed (at least, during the making of this article).
+it's an awsome app that gives an OS-like feel, but unlike an OS, it saves (mostly) everything on RAM, and encryptes the entire fake file system
+right before saving it, making it far more secure than a regular OS.
+
+## Part 1: The Home directory.
+
+```rs
+#[derive(Clone, Debug, PartialEq, PartialOrd, Serialize, Deserialize)]
+pub struct Home{
+    path: Vec<Directory>,
+    current_dir: Directory,
+}
+
+pub static mut FS: Home = Home::new();
+```
+
+This may look simple at first, but there's actually a lot more to it.
+
+First, the FS object. It looks like a normal static variable, but if it was, then the code wouldn't change.
+so, it's a static mutable object, which is something very unique in rust. For now, there's no need  to explain it further,
+but it it quickly becomes very complicated to handle static mutable objects.
+
+the Home structure manages to file system completely, Other than having some basic dervitives,
+it's just a path and a current directory.
+
+Looking back at it, I probably could've done this better by adding more refrences and controlling, but it doesn't actually matter
+Too much since the Directory file type is simply a recursive data structure with a bunch of strings.
+
+## Part 2: The Directories.
+
+Directories might be one of the only times where using a recursive data structure is actually easier than
+using a normal data Structure. The directory struct works like this:
+```rust
+#[derive(Clone, Debug, PartialEq, PartialOrd, Serialize, Deserialize)]
+pub struct Directory{
+    files: Vec<DirectoryItems>,
+    name: String,
+}
+#[derive(Clone, Debug, PartialEq, PartialOrd, Serialize, Deserialize)]
+pub enum DirectoryItems{File(File),Directory(Directory)}
+
+#[derive(Clone, Debug, PartialEq, PartialOrd, Serialize, Deserialize)]
+pub struct File{
+    name: String,
+    location: PathBuf
+}
+```
+
+The Directory structure is probably the simplest part of the code, which is an odd thing to say about a recursive data
+structure, but in the current context, it makes sense.
+
+I thought about making a simple Linked list, where I would simply have a vector of each data structure. However,
+I decided to go for a single Enum based vector since it would make it easier to implement new Data structures.
+
+About the File struct, I may have lied a bit, the fake file system does interact with the real file system,
+however, it does it in a secure way where, where the file is only saved encrypted, eliminating the threat of
+someone stealing your files away.
+
+I did this by using a fairly simple AES encryption:
+```rust
+#[tauri::command]
+pub fn authenticate_user(name: &str, password: &str) -> bool{
+    let location = encode_config(aes_encrypt(name, password, name.as_bytes()), URL_SAFE);
+    let location = dir().join(location);
+    if !location.exists(){return false;}
+    for entry in read_dir(location).unwrap(){
+        if entry.is_err(){continue;}
+        let entry = entry.unwrap();
+        let entry_path = entry.path();
+        let entry = decode_config(entry.file_name().to_bytes(), URL_SAFE);
+        if entry.is_err() {continue;}
+        let entry = aes_decrypt(name, password, &entry.unwrap());
+        let entry = String::from_utf8(entry);
+        if entry.is_err() {continue;}
+        match entry.unwrap().as_str(){
+            "auth" => {
+                let mut auth_data = File::open(entry_path).unwrap();
+                let mut buffer: Vec<u8> = Vec::new();
+                let result = auth_data.read_to_end(&mut buffer);
+                if result.is_err() {return false;}
+                return aes_try_decrypt(name, password, &buffer);
+            }
+            _ => {continue;}
+        }
+    }
+    return false;
+}
+```
+
+when the name or password are incorrect, the decrypted file would simply make no sense, therefore there is
+no threat of someone opening the files and reading them.
+
+Of course, the are a lot more parts to Ksed, but this simple data structure is still one of the coolest parts of the
+code for me. Because instead of using a pre-build database, I created my own structure that can scale fairly well
+and is also more secure and easy to use compared to usual databases, which is why I like it so much.
+
+Thanks for reading this!
