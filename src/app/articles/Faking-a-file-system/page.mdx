@@ -20,7 +20,7 @@ right before saving it, making it far more secure than a regular OS.
 
 ## Part 1: The Home directory.
 
-```rs
+```rust
 #[derive(Clone, Debug, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct Home{
     path: Vec<Directory>,
@@ -72,7 +72,7 @@ About the File struct, I may have lied a bit, the fake file system does interact
 however, it does it in a secure way where, where the file is only saved encrypted, eliminating the threat of
 someone stealing your files away.
 
-I did this by using a fairly simple AES encryption:
+I did this by attempting to decrypt the file using an AES CBC decryption, and checking if the content is a string:
 ```rust
 #[tauri::command]
 pub fn authenticate_user(name: &str, password: &str) -> bool{
