@@ -8,13 +8,14 @@ import logoCosmos from '@/images/logos/diddy2.png';
 import logoHelioStream from '@/images/logos/whitepanther.jpg'
 import logoOpenShuttle from '@/images/logos/google.png'
 import logoPlanetaria from '@/images/logos/icon.png'
+import ksed from '@/images/logos/ksed.png';
 
 const projects = [
   {
     name: 'Hibori',
     description:
       'Connecting Students to other students using shared hobbies and interests.',
-    link: { href: 'https://hiboridownloadplese.vercel.app/', label: 'download page' },
+    link: { href: 'https://hiboridownloadplese.vercel.app/', label: 'Installation page' },
     logo: logoPlanetaria,
   },
   {
@@ -43,6 +44,12 @@ const projects = [
       'A PDF editor made as part of the google mentoring program. (no download link)',
     logo: logoOpenShuttle,
   },
+  {
+    name: 'Ksed',
+    description: 'A general purpose app with an OS-like feel and a large focus on security, in order to use OS features in a secure environment without needing to learn anything',
+    logo: ksed,
+    link: { href: 'https://github.com/raisfeld-ori/Ksed', label: 'Github page'}
+  }
 ]
 
 function LinkIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
