@@ -2,9 +2,9 @@ import { ArticleLayout } from '@/components/ArticleLayout'
 
 export const article = {
   author: 'Ori Raisfeld',
-  date: '2024-12-7',
+  date: '2024-12-10',
   title: 'How to write a programming language',
-  description: "A quick guide for programming languages and how",
+  description: "A guide for making programming languages",
 }
 
 export const metadata = {
@@ -13,3 +13,522 @@ export const metadata = {
 }
 
 export default (props) => <ArticleLayout article={article} {...props} />
+
+github repo if you're not intrested in reading and just want the code: https://github.com/raisfeld-ori/language_example.
+
+
+After learning the basics of programming, there is a question that every new developer I ever met asked me: "How are programming languages made?".
+I first explain that every language is made up of another programming language, and those languages are made from other languges, and so on, until we reach
+the computer hardware. I then reccomend them to learn by making their own language, which is both fun and teaches you a lot.
+
+So in this guide, I will teach you how to make a programming language in under 300 lines of code!
+
+## Part 1: Parsing
+
+When you run any programming language, the first thing it does is read the file you gave as an argument, and then
+turn the string into grouped structures. For example, the input "x = 1 + 1;x = 2-1;" could turn into [Assignment("x", "1"), Assignment("x", "2-1")],
+which makes it easier for the program to understand what does the input mean.
+
+Usually, this process requires iterating through the entire input, tokenizing it, creating an AST, etc.
+To make this guide simpler, we will use a parser named [Pest](https://pest.rs/), which makes the process far simpler than using vanila rust.
+In this gudie I won't teach PEG grammer, but you can learn it easily from the [pest book](https://pest.rs/book/).
+
+First Let's create a new project with ```cargo new language_example```, go into the new reposetory and add Pest VIA ```cargo add pest pest_derive```.
+Afterward we will create a lexer structure with this code:
+```rust
+use pest::Parser;
+use pest_derive::Parser;
+
+#[derive(Parser)]
+#[grammar = "grammar.pest"]
+struct Parser;
+```
+And make a grammer file by creating a new file in the src directory named "grammer.pest".
+
+Now, let's start creating the grammer:
+
+First, we will define numbers, strings, and identifiers:
+```rust
+integer = @{ ("+" | "-")? ~ ASCII_DIGIT+ } // Example: -
+float = @{ ("+" | "-")? ~ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT* }
+number = { integer | float }
+
+single_quoted_string = @{ "'" ~ (!"\'" ~ ANY)* ~ "'" }
+double_quoted_string = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
+string = { single_quoted_string | double_quoted_string }
+
+identifier = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC)* }
+```
+This will be the basic primitive types for the rest of the language.
+
+We will use this primitives to create more complicated structures, like functions and expressions:
+```rust
+// Math operations
+math_operator = { "+" | "-" }
+math_expression = { (number | string | identifier) ~ math_operator ~ (number | string | identifier) }
+
+// Function call syntax
+function_call = { identifier ~ "(" ~ argument_list? ~ ")" }
+argument_list = { (number | string | identifier | math_expression) ~ ("," ~ argument_list)? }
+```
+
+And now, we will just add a couple extra silent and wrappers to make the language easier to parse and use:
+```rust
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+program = { SOI ~ statement* ~ EOI }
+statement = { (function_call | assignment | math_expression) ~ ";" }
+assignment = { identifier ~ "=" ~ (string | function_call | math_expression) }
+comment = _{ "//" ~ (!";" ~ ANY)* }
+```
+
+And that's it! we finished the basic language structure.
+
+Now, we can just parse the code easily by running ```Lexer::parse(Rule::program, input);```.
+
+## part 2: IR (Intermediate representation)
+
+After parsing the string, we have a group of strings and rules instead of one giant string, however,
+that group is still not usable, since it's too complicated. So to fix this, we will turn those groups of string and rules
+into an Intermediate representation, which is almost usable.
+
+First, let's iterate through the entire input:
+```rust
+fn parsing(input: &str) -> Result<(), String> {
+    let result = Lexer::parse(Rule::program, input);
+    if result.is_err(){
+        let error = result.unwrap_err();
+        return Err(format!("on Line: {:?} -> Syntax Error: {} -> {}", error.line_col, error.variant.message(), error.line()));
+    }
+    else{
+        // peeking into the program
+        let statements = result.unwrap().peek().unwrap().into_inner();
+        // iterating through the statements
+        for statement in statements.into_iter(){
+            // for non statements
+            if statement.as_rule() != Rule::statement{continue;}
+            // peek into the statement
+            let statement =  statement.into_inner().peek().unwrap();
+        }
+    }
+    Ok(());
+}
+```
+Now, let's create an IR enum:
+```rust
+#[derive(Debug, Clone)]
+enum IR{
+    Function(String, Vec<Data>),
+    Assignment(String, Data),
+}
+#[derive(Debug, Clone)]
+enum Data{
+    String(String),
+    Number(f64),
+    MathExpression(Box<Data>, Operation, Box<Data>),
+    Variable(String),
+}
+#[derive(Debug, Clone)]
+enum Operation{
+    Add,
+    Subtract,
+}
+```
+
+Also, let's add parsing for the Data and for the Operations:
+```rust
+impl Operation{
+    fn parse(input: &str) -> Option<Operation>{
+        match input{
+            "+" => {
+                return Some(Operation::Add);
+            }
+            "-" => {
+                return Some(Operation::Subtract);
+            }
+            _ => {
+                return None;
+            }
+        }
+    }
+}
+impl Data{
+    fn parse(input: &Pair<'_, Rule>) -> Option<Data>{
+        match input.as_rule(){
+            Rule::number => {
+                let value = input.clone().into_inner().peek();
+                if value.is_none(){return None;}
+                else{
+                    let value: Result<f64, _> = value.unwrap().as_str().parse();
+                    if value.is_err(){return None;}
+                    return Some(Data::Number(value.unwrap()));
+                }
+            }
+            Rule::string => {
+                let value = input.clone().into_inner().peek();
+                if value.is_none(){return None;}
+                else{
+                    let value = value.unwrap().as_str().replace('"', "").replace("'", "");
+                    return Some(Data::String(value));
+                }
+            }
+            Rule::math_expression => {
+                let mut expression = input.clone().into_inner();
+                let left = Data::parse(&expression.next().unwrap());
+                let operation = Operation::parse(expression.next().unwrap().as_str());
+                if operation.is_none() || left.is_none(){return None;}
+                let right = Data::parse(&expression.next().unwrap());
+                if left.is_none() || right.is_none(){return None;}
+                else{
+                    return Some(Data::MathExpression(Box::new(left.unwrap()), operation.unwrap(), Box::new(right.unwrap())));
+                }
+            }
+            Rule::identifier => {
+                return Some(Data::Variable(input.as_str().to_string()));
+            }
+            _ => {
+                return None;
+            }
+        }
+    }
+}
+```
+
+Second, let's handle every type of statement:
+
+For function calls, we need to find the function name, and its arguments:
+```rust
+let mut function_name = "";
+let mut args = Vec::new();
+if statement.clone().into_inner().peek().is_none(){tokens.push(IR::Function(function_name.to_string(), args));continue;}
+for (i, arg) in statement.into_inner().into_iter().into_iter().enumerate(){
+    let line = (arg.as_str(), line);
+    if i == 0{function_name = arg.as_str();}
+    else {
+        let data = Data::parse(&arg.into_inner().peek().unwrap());
+        if data.is_none(){
+            return Err("Invalid argument: ".to_string() +
+            line.0 + " On line: " + 
+            line.1.to_string().as_str());
+        }
+        
+        args.push(data.unwrap());
+    }
+}
+IR::Function(function_name.to_string(), args);
+```
+For assigning to variables, we need to get the variable name and value
+```rust
+let mut statement = statement.into_inner();
+let var = statement.next().unwrap();
+let value = statement.next().unwrap();
+let data = Data::parse(&value);
+if data.is_none(){
+    return Err("Invalid argument: ".to_string() +
+    var.as_str() + " On line: " + 
+    line.to_string().as_str());
+}
+tokens.push(IR::Assignment(var.as_str().to_string(), data.unwrap()));
+```
+
+When we combine everything together, we get this:
+```rust
+use pest::{iterators::Pair, Parser};
+use pest_derive::Parser;
+
+#[derive(Parser)]
+#[grammar = "grammar.pest"]
+struct Lexer;
+
+#[derive(Debug, Clone)]
+enum IR{
+    Function(String, Vec<Data>),
+    Assignment(String, Data),
+}
+#[derive(Debug, Clone)]
+enum Data{
+    String(String),
+    Number(f64),
+    MathExpression(Box<Data>, Operation, Box<Data>),
+    Variable(String),
+}
+#[derive(Debug, Clone)]
+enum Operation{
+    Add,
+    Subtract,
+}
+impl Operation{
+    fn parse(input: &str) -> Option<Operation>{
+        match input{
+            "+" => {
+                return Some(Operation::Add);
+            }
+            "-" => {
+                return Some(Operation::Subtract);
+            }
+            _ => {
+                return None;
+            }
+        }
+    }
+}
+impl Data{
+    fn parse(input: &Pair<'_, Rule>) -> Option<Data>{
+        match input.as_rule(){
+            Rule::number => {
+                let value = input.clone().into_inner().peek();
+                if value.is_none(){return None;}
+                else{
+                    let value: Result<f64, _> = value.unwrap().as_str().parse();
+                    if value.is_err(){return None;}
+                    return Some(Data::Number(value.unwrap()));
+                }
+            }
+            Rule::string => {
+                let value = input.clone().into_inner().peek();
+                if value.is_none(){return None;}
+                else{
+                    let value = value.unwrap().as_str().replace('"', "").replace("'", "");
+                    return Some(Data::String(value));
+                }
+            }
+            Rule::math_expression => {
+                let mut expression = input.clone().into_inner();
+                let left = Data::parse(&expression.next().unwrap());
+                let operation = Operation::parse(expression.next().unwrap().as_str());
+                if operation.is_none() || left.is_none(){return None;}
+                let right = Data::parse(&expression.next().unwrap());
+                if left.is_none() || right.is_none(){return None;}
+                else{
+                    return Some(Data::MathExpression(Box::new(left.unwrap()), operation.unwrap(), Box::new(right.unwrap())));
+                }
+            }
+            Rule::identifier => {
+                return Some(Data::Variable(input.as_str().to_string()));
+            }
+            _ => {
+                return None;
+            }
+        }
+    }
+}
+
+fn parsing(input: &str) -> Result<Vec<IR>, String> {
+    let result = Lexer::parse(Rule::program, input);
+    if result.is_err(){
+        let error = result.unwrap_err();
+        return Err(format!("on Line: {:?} -> Syntax Error: {} -> {}", error.line_col, error.variant.message(), error.line()));
+    }
+    else{
+        let mut tokens: Vec<IR> = Vec::new();
+        let statements = result.unwrap().peek().unwrap().into_inner();
+        for statement in statements.into_iter(){
+            if statement.as_rule() != Rule::statement{continue;}
+            let statement =  statement.into_inner().peek().unwrap();
+            let line =  statement.line_col().0;
+            match statement.as_rule(){
+                Rule::function_call => {
+                    let mut function_name = "";
+                    let mut args = Vec::new();
+                    if statement.clone().into_inner().peek().is_none(){tokens.push(IR::Function(function_name.to_string(), args));continue;}
+                    for (i, arg) in statement.into_inner().into_iter().into_iter().enumerate(){
+                        let line = (arg.as_str(), line);
+                        if i == 0{function_name = arg.as_str();}
+                        else {
+                            let data = Data::parse(&arg.into_inner().peek().unwrap());
+                            if data.is_none(){
+                                return Err("Invalid argument: ".to_string() +
+                                line.0 + " On line: " + 
+                                line.1.to_string().as_str());
+                            }
+                            
+                            args.push(data.unwrap());
+                        }
+                    }
+                    tokens.push(IR::Function(function_name.to_string(), args));
+                }
+                Rule::math_expression => {
+                    continue;
+                }
+                Rule::assignment => {
+                    let mut statement = statement.into_inner();
+                    let var = statement.next().unwrap();
+                    let value = statement.next().unwrap();
+                    let data = Data::parse(&value);
+                    if data.is_none(){
+                        return Err("Invalid argument: ".to_string() +
+                        var.as_str() + " On line: " + 
+                        line.to_string().as_str());
+                    }
+                    tokens.push(IR::Assignment(var.as_str().to_string(), data.unwrap()));
+                }
+                _ => {
+                    continue;
+                }
+            }
+        }
+        return Ok(tokens);
+    }
+}
+```
+
+And now, we have an IR vector of the original string that helps understand the string far better.
+Since IR implements debug, we can run the code using an example input like this:
+```rust
+fn main() {
+    let res = parsing("x=2+1;print(x);");
+    if res.is_err(){
+        println!("Error: {}", res.unwrap_err());
+    }
+    else {
+        println!("{:?}", res.unwrap());
+    }
+}
+```
+
+## part 3: Running the code
+
+In compilers, this is very complicated, but in interperters, this is quite simple to do, 
+we just need to run a different function for every IR:
+```rust
+fn run_ir(tokens: Vec<IR>) -> Result<(), String>{
+    let mut variables: HashMap<String, Data>  = HashMap::new();
+    for token in tokens.iter(){
+        match token{
+            IR::Function(name, args) => {
+                todo!("here will be the code for running functions")
+            }
+            IR::Assignment(var, data) => {
+                variables.insert(var.to_string(), data.clone());
+            }
+        }
+    }
+    return Ok(());
+}
+```
+
+For variables, all we need to do is implement a Hashmap, but for function and Data this may be a bit more complicated. 
+Let's handle the data first.
+
+Displaying the data just requires handling each data type and turning it into a string:
+```rust
+impl Operation{
+      fn run(&self, left: &Box<Data>, right: &Box<Data>, varibles: &HashMap<String, Data>) -> Option<String>{
+        match self{
+            Operation::Add => {
+                match *left.clone(){
+                    Data::Number(value1) => {
+                        match *right.clone(){
+                            Data::Number(value2) => {
+                                return Some((value1 + value2).to_string());
+                            }
+                            Data::String(value2) => {
+                                return Some(value1.to_string() + value2.as_str());
+                            }
+                            _ => {
+                                return None;
+                            }
+                        }
+                    }
+                    Data::String(value1) => {
+                        let right = right.evaluate(varibles);
+                        if right.is_none(){return None;}
+                        return Some(value1 + right.unwrap().as_str());
+                    }
+                    _ => {
+                        return None;
+                    }
+                }
+            }
+            Operation::Subtract => {
+                match **left{
+                    Data::Number(value1) => {
+                        match **right{
+                            Data::Number(value2) => {
+                                return Some((value1 - value2).to_string());
+                            }
+                            _ => {
+                                return None;
+                            }
+                        }
+                    }
+                    _ => {
+                        return None;
+                    }
+                }
+            }
+        }
+    }
+}
+
+impl Data{
+      fn evaluate(&self, variables: &HashMap<String, Data>) -> Option<String>{
+        match self{
+            Data::Number(value) => {
+                return Some(value.to_string());
+            }
+            Data::String(value) => {
+                return Some(value.to_string());
+            }
+            Data::MathExpression(left, operation, right) => {
+                return operation.run(left, right, variables)
+            }
+            Data::Variable(value) => {
+                let value = variables.get(value);
+                if value.is_none(){return None;}
+                else{
+                    return value.unwrap().evaluate(variables);
+                }
+            }
+        }
+    }
+}
+```
+
+This may look like a lot of code, But it's just matching enums and convertion types.
+After creating the builtin functions and turning the data into a string, it's not as difficult to create function calls:
+```
+fn call_builtin(name: &str, args: &Vec<Data>, variables: &HashMap<String, Data>) -> Result<(), String>{
+    if !BUILTIN.contains(&name){return Err("NO FUNCTION FOUND WITH THIS NAME".to_string());}
+    else{
+        match name{
+            "print" => {
+                for arg in args.iter(){
+                    let arg = arg.evaluate(variables);
+                    if arg.is_none(){return Err("INVALID ARGUMENT".to_string());}
+                    println!("{}", arg.unwrap());
+                }
+            }
+            _ => {
+                return Err("NO FUNCTION FOUND WITH THIS NAME".to_string());
+            }
+        }
+    }
+    return Ok(());
+}
+```
+
+And now we're done:
+```rust
+fn run_ir(tokens: Vec<IR>) -> Result<(), String>{
+    let mut variables: HashMap<String, Data>  = HashMap::new();
+    for token in tokens.iter(){
+        match token{
+            IR::Function(name, args) => {
+                let err = call_builtin(name, args, &variables);
+                if err.is_err(){return err;}
+            }
+            IR::Assignment(var, data) => {
+                variables.insert(var.to_string(), data.clone());
+            }
+        }
+    }
+    return Ok(());
+}
+```
+
+You now have your own simple programming language! this language is meant to be as simple to make as possible, so it has a lot of issues and missing features,
+so feel free to continue this project!
+
+Here is the github repo if you need any help, or if you want to run the code: 
+
+https://github.com/raisfeld-ori/language_example
