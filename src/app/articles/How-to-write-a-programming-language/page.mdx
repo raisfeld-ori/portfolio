@@ -486,7 +486,7 @@ impl Data{
 
 This may look like a lot of code, But it's just matching enums and convertion types.
 After creating the builtin functions and turning the data into a string, it's not as difficult to create function calls:
-```
+```rust
 fn call_builtin(name: &str, args: &Vec<Data>, variables: &HashMap<String, Data>) -> Result<(), String>{
     if !BUILTIN.contains(&name){return Err("NO FUNCTION FOUND WITH THIS NAME".to_string());}
     else{
