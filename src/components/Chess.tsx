@@ -371,7 +371,7 @@ export default function ChessBoard() {
           {board.map((piece, index) => (
             <div
               key={index}
-              className={`w-16 h-16 flex items-center font-extrabold justify-center text-4xl cursor-default select-none
+              className={`w-12 h-12 md:w-16 md:h-16 flex items-center font-extrabold justify-center text-4xl cursor-default select-none
                 ${(Math.floor(index / 8) + index) % 2 === 0 ? 'bg-zinc-500 hover:bg-zinc-400' : 'bg-zinc-700 hover:bg-zinc-500'}
                 ${selectedPiece === index ? 'ring-4 ring-blue-500' : ''}
                 ${piece?.color === 'white' ? 'text-white' : 'text-black'}`}
