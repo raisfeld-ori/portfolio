@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 
-type Color = 'black' | 'white'
+type Color = 'white' | 'black'
 
 export enum CharacterTypes {
   Pawn,
@@ -57,9 +57,9 @@ function Move(piece: number, target: number, board: (Character | null)[]): (Char
 
   switch (currentPiece.type) {
     case CharacterTypes.Pawn:
-      const direction = currentPiece.color === 'white' ? 1 : -1;
-      const startRow = currentPiece.color === 'white' ? 1 : 6;
-      const promotionRow = currentPiece.color === 'white' ? 7 : 0;
+      const direction = currentPiece.color === 'black' ? 1 : -1;
+      const startRow = currentPiece.color === 'black' ? 1 : 6;
+      const promotionRow = currentPiece.color === 'black' ? 7 : 0;
 
       if (currentCol === targetCol) {
         if (targetRow === currentRow + direction) {
@@ -114,7 +114,7 @@ function Move(piece: number, target: number, board: (Character | null)[]): (Char
         }
         
         // En passant capture
-        const enPassantRow = currentPiece.color === 'white' ? 4 : 3;
+        const enPassantRow = currentPiece.color === 'black' ? 4 : 3;
         if (currentRow === enPassantRow) {
           const enPassantTarget = board[target - (8 * direction)];
           if (enPassantTarget && 
@@ -248,24 +248,24 @@ function isPathClear(start: number, end: number, board: (Character | null)[]): b
 export function initializeBoard(): (Character | null)[] {
   const board: (Character | null)[] = new Array(64).fill(null);
   
-  // White pieces
+  // white pieces
   const whitePieces: CharacterTypes[] = [
     CharacterTypes.Rook, CharacterTypes.Knight, CharacterTypes.Bishop, 
     CharacterTypes.Queen, CharacterTypes.King, CharacterTypes.Bishop, 
     CharacterTypes.Knight, CharacterTypes.Rook
   ];
   
-  // Place white pawns
+  // Place black pawns
   for (let i = 8; i < 16; i++) {
-    board[i] = { type: CharacterTypes.Pawn, color: 'white' };
+    board[i] = { type: CharacterTypes.Pawn, color: 'black' };
   }
   
-  // Place white back row
+  // Place black back row
   whitePieces.forEach((type, index) => {
-    board[index] = { type, color: 'white' };
+    board[index] = { type, color: 'black' };
   });
 
-  // Black pieces
+  // black pieces
   const blackPieces: CharacterTypes[] = [
     CharacterTypes.Rook, CharacterTypes.Knight, CharacterTypes.Bishop, 
     CharacterTypes.King, CharacterTypes.Queen, CharacterTypes.Bishop, 
@@ -274,12 +274,12 @@ export function initializeBoard(): (Character | null)[] {
   
   // Place black pawns
   for (let i = 48; i < 56; i++) {
-    board[i] = { type: CharacterTypes.Pawn, color: 'black' };
+    board[i] = { type: CharacterTypes.Pawn, color: 'white' };
   }
   
   // Place black back row
   blackPieces.forEach((type, index) => {
-    board[index + 56] = { type, color: 'black' };
+    board[index + 56] = { type, color: 'white' };
   });
 
   return board;
@@ -292,8 +292,8 @@ export function handlePawnMove(board: (Character | null)[], start: number, targe
   
   if (!piece || piece.type !== CharacterTypes.Pawn) return newBoard;
 
-  const direction = piece.color === 'white' ? 1 : -1;
-  const promotionRow = piece.color === 'white' ? 7 : 0;
+  const direction = piece.color === 'black' ? 1 : -1;
+  const promotionRow = piece.color === 'black' ? 7 : 0;
 
   // Handle en passant capture
   if (Math.abs(getColumn(start) - getColumn(target)) === 1 && 
@@ -343,8 +343,8 @@ function getCharacterSymbol(character: Character): string {
 export default function ChessBoard() {
   const [turn, setTurn] = useState<Color>('white')
   const [board, setBoard] = useState<(Character | null)[]>(initializeBoard())
+  const [winner, setWinner] = useState<string | undefined>()
   const [selectedPiece, setSelectedPiece] = useState<number | null>(null)
-
   const handlePieceClick = (index: number) => {
     if (selectedPiece === null) {
       if (board[index] && board[index]?.color === turn) {
@@ -354,6 +354,9 @@ export default function ChessBoard() {
       let newBoard = Move(selectedPiece, index, board);
       if (!newBoard){setSelectedPiece(null);return;}
       setBoard(newBoard);
+      if (newBoard.filter((piece) => piece?.type === CharacterTypes.King).length === 1) {
+        setWinner(newBoard.filter((piece) => piece?.type === CharacterTypes.King)[0]?.color)
+      }
       setTurn(turn === 'white' ? 'black' : 'white')
       setSelectedPiece(null)
     }
@@ -361,8 +364,9 @@ export default function ChessBoard() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
+      <div>{winner ? `Winner: ${winner}` : `Turn: ${turn}`}</div>
       <h1 className="text-4xl font-bold mb-8">Chess Game</h1>
-      <div className="p-8 rounded-lg shadow-lg">
+      <div className={"p-8 rounded-lg shadow-lg " + (winner ? 'blur-lg pointer-events-none' : '')}>
         <div className="grid grid-cols-8 gap-1">
           {board.map((piece, index) => (
             <div
@@ -370,7 +374,7 @@ export default function ChessBoard() {
               className={`w-16 h-16 flex items-center font-extrabold justify-center text-4xl cursor-default select-none
                 ${(Math.floor(index / 8) + index) % 2 === 0 ? 'bg-zinc-500 hover:bg-zinc-400' : 'bg-zinc-700 hover:bg-zinc-500'}
                 ${selectedPiece === index ? 'ring-4 ring-blue-500' : ''}
-                ${piece?.color === 'black' ? 'text-black' : 'text-white'}`}
+                ${piece?.color === 'white' ? 'text-white' : 'text-black'}`}
               onClick={() => handlePieceClick(index)}
             >
               {piece && getCharacterSymbol(piece)}
