@@ -32,17 +32,17 @@ function getColumn(index: number): number {
   return index % 8;
 }
 
-function canMove(piece: number, target: number, board: (Character | null)[]): boolean {
+function Move(piece: number, target: number, board: (Character | null)[]): (Character | null)[] | null {
   // Validate board
-  if (!isValidBoard(board)) return false;
+  if (!isValidBoard(board)) return null;
   
   // Ensure piece exists
   const currentPiece = board[piece];
-  if (!currentPiece) return false;
+  if (!currentPiece) return null;
 
   // Prevent moving to a square occupied by a piece of the same color
   const targetPiece = board[target];
-  if (targetPiece && targetPiece.color === currentPiece.color) return false;
+  if (targetPiece && targetPiece.color === currentPiece.color) return null;
 
   const currentRow = getRow(piece);
   const currentCol = getColumn(piece);
@@ -52,34 +52,65 @@ function canMove(piece: number, target: number, board: (Character | null)[]): bo
   const rowDiff = Math.abs(targetRow - currentRow);
   const colDiff = Math.abs(targetCol - currentCol);
 
+  // Create a copy of the board to modify
+  const newBoard = [...board];
+
   switch (currentPiece.type) {
     case CharacterTypes.Pawn:
       const direction = currentPiece.color === 'white' ? 1 : -1;
       const startRow = currentPiece.color === 'white' ? 1 : 6;
       const promotionRow = currentPiece.color === 'white' ? 7 : 0;
 
-      // Standard forward move
       if (currentCol === targetCol) {
-        // Single square move
         if (targetRow === currentRow + direction) {
-          return !targetPiece; // Can only move to empty square
+          if (!targetPiece) {
+            newBoard[target] = { ...currentPiece, hasMoved: true };
+            newBoard[piece] = null;
+            
+            // Promotion check
+            if (targetRow === promotionRow) {
+              newBoard[target] = { 
+                type: CharacterTypes.Queen, 
+                color: currentPiece.color 
+              };
+            }
+            return newBoard;
+          }
+          return null;
         }
         
-        // First move can be two squares
         if (!currentPiece.hasMoved && 
             targetRow === currentRow + (2 * direction) && 
             currentRow === startRow) {
           const middleSquare = piece + (8 * direction);
-          return !board[middleSquare] && !targetPiece;
+          if (!board[middleSquare] && !targetPiece) {
+            newBoard[target] = { 
+              ...currentPiece, 
+              hasMoved: true,
+              enPassantTarget: true 
+            };
+            newBoard[piece] = null;
+            return newBoard;
+          }
+          return null;
         }
       }
       
-      // Capture diagonally
       if (Math.abs(currentCol - targetCol) === 1 && 
           targetRow === currentRow + direction) {
         // Normal capture
         if (targetPiece && targetPiece.color !== currentPiece.color) {
-          return true;
+          newBoard[target] = { ...currentPiece, hasMoved: true };
+          newBoard[piece] = null;
+          
+          // Promotion check
+          if (targetRow === promotionRow) {
+            newBoard[target] = { 
+              type: CharacterTypes.Queen, 
+              color: currentPiece.color 
+            };
+          }
+          return newBoard;
         }
         
         // En passant capture
@@ -90,43 +121,108 @@ function canMove(piece: number, target: number, board: (Character | null)[]): bo
               enPassantTarget.type === CharacterTypes.Pawn && 
               enPassantTarget.color !== currentPiece.color && 
               enPassantTarget.enPassantTarget) {
-            return true;
+            newBoard[target] = { ...currentPiece, hasMoved: true };
+            newBoard[piece] = null;
+            newBoard[target - (8 * direction)] = null; // Remove captured pawn
+            return newBoard;
           }
         }
         
-        return false;
+        return null;
       }
       
-      return false;
+      return null;
 
     case CharacterTypes.Rook:
-      // Move along rows or columns
-      return (currentRow === targetRow || currentCol === targetCol) && 
-             isPathClear(piece, target, board);
+      if ((currentRow === targetRow || currentCol === targetCol) && 
+          isPathClear(piece, target, board)) {
+        newBoard[target] = { ...currentPiece, hasMoved: true };
+        newBoard[piece] = null;
+        return newBoard;
+      }
+      return null;
 
     case CharacterTypes.Knight:
-      // Classic L-shaped move: 2 squares in one direction, 1 in perpendicular
-      return (rowDiff === 2 && colDiff === 1) || 
-             (rowDiff === 1 && colDiff === 2);
+      if ((rowDiff === 2 && colDiff === 1) || 
+          (rowDiff === 1 && colDiff === 2)) {
+        newBoard[target] = { ...currentPiece, hasMoved: true };
+        newBoard[piece] = null;
+        return newBoard;
+      }
+      return null;
 
     case CharacterTypes.Bishop:
-      // Diagonal move
-      return rowDiff === colDiff && isPathClear(piece, target, board);
+      if (rowDiff === colDiff && isPathClear(piece, target, board)) {
+        newBoard[target] = { ...currentPiece, hasMoved: true };
+        newBoard[piece] = null;
+        return newBoard;
+      }
+      return null;
 
     case CharacterTypes.Queen:
-      // Combines Rook and Bishop movements
-      return (currentRow === targetRow || 
-              currentCol === targetCol || 
-              rowDiff === colDiff) && 
-             isPathClear(piece, target, board);
+      if ((currentRow === targetRow || 
+           currentCol === targetCol || 
+           rowDiff === colDiff) && 
+          isPathClear(piece, target, board)) {
+        newBoard[target] = { ...currentPiece, hasMoved: true };
+        newBoard[piece] = null;
+        return newBoard;
+      }
+      return null;
 
     case CharacterTypes.King:
-      // Move one square in any direction
-      // TODO: Add castling logic
-      return rowDiff <= 1 && colDiff <= 1;
+      // Normal one-square move
+      if (rowDiff <= 1 && colDiff <= 1) {
+        newBoard[target] = { ...currentPiece, hasMoved: true };
+        newBoard[piece] = null;
+        return newBoard;
+      }
+      
+      // Castling logic
+      if (!currentPiece.hasMoved && rowDiff === 0 && colDiff === 2) {
+        // Determine castling direction (kingside or queenside)
+        const isKingSide = targetCol > currentCol;
+        const rookStartCol = isKingSide ? 7 : 0;
+        const rookTargetCol = isKingSide ? 5 : 3;
+        const rookStartIndex = currentRow * 8 + rookStartCol;
+        const rookTargetIndex = currentRow * 8 + rookTargetCol;
+        
+        const rook = newBoard[rookStartIndex];
+        
+        // Validate rook
+        if (!rook || 
+            rook.type !== CharacterTypes.Rook || 
+            rook.color !== currentPiece.color || 
+            rook.hasMoved) {
+          return null;
+        }
+        
+        // Check path is clear between king and rook
+        const start = Math.min(currentCol, rookStartCol);
+        const end = Math.max(currentCol, rookStartCol);
+        for (let col = start + 1; col < end; col++) {
+          const checkIndex = currentRow * 8 + col;
+          if (newBoard[checkIndex]) {
+            return null;
+          }
+        }
+        
+        // Check king doesn't pass through or end in check
+        // TODO: Implement check detection logic
+        
+        // Perform castling move
+        newBoard[target] = { ...currentPiece, hasMoved: true };
+        newBoard[piece] = null;
+        newBoard[rookTargetIndex] = { ...rook, hasMoved: true };
+        newBoard[rookStartIndex] = null;
+        
+        return newBoard;
+      }
+      
+      return null;
 
     default:
-      return false;
+      return null;
   }
 }
 
@@ -255,14 +351,9 @@ export default function ChessBoard() {
         setSelectedPiece(index)
       }
     } else {
-      let movement = canMove(selectedPiece, index, board);
-      if (!movement){setSelectedPiece(null);return;}
-      setBoard((prevBoard) => {
-        let newBoard = [...prevBoard]
-        newBoard[index] = newBoard[selectedPiece]
-        newBoard[selectedPiece] = null
-        return newBoard
-      })
+      let newBoard = Move(selectedPiece, index, board);
+      if (!newBoard){setSelectedPiece(null);return;}
+      setBoard(newBoard);
       setTurn(turn === 'white' ? 'black' : 'white')
       setSelectedPiece(null)
     }
