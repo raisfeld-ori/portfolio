@@ -324,17 +324,17 @@ export function handlePawnMove(board: (Character | null)[], start: number, targe
 function getCharacterSymbol(character: Character): string {
   switch (character.type) {
     case CharacterTypes.Pawn:
-      return '♙'
+      return 'https://uxwing.com/wp-content/themes/uxwing/download/sport-and-awards/chess-pawn-icon.png'
     case CharacterTypes.Knight:
-      return '♞'
+      return 'https://uxwing.com/wp-content/themes/uxwing/download/sport-and-awards/chess-game-knight-icon.png'
     case CharacterTypes.Bishop:
-      return '♝'
+      return 'https://uxwing.com/wp-content/themes/uxwing/download/sport-and-awards/chess-bishop-icon.png'
     case CharacterTypes.King:
-      return '♚'
+      return 'https://uxwing.com/wp-content/themes/uxwing/download/sport-and-awards/crown-icon.png'
     case CharacterTypes.Queen:
-      return '♛'
+      return 'https://uxwing.com/wp-content/themes/uxwing/download/sport-and-awards/crown-jewel-icon.png'
     case CharacterTypes.Rook:
-      return '♜'
+      return 'https://uxwing.com/wp-content/themes/uxwing/download/sport-and-awards/chess-rook-icon.png'
     default:
       return ''
   }
@@ -371,13 +371,14 @@ export default function ChessBoard() {
           {board.map((piece, index) => (
             <div
               key={index}
-              className={`w-12 h-12 md:w-16 md:h-16 flex items-center font-extrabold justify-center text-4xl cursor-default select-none
-                ${(Math.floor(index / 8) + index) % 2 === 0 ? 'bg-zinc-500 hover:bg-zinc-400' : 'bg-zinc-700 hover:bg-zinc-500'}
+              className={`w-8 h-8 md:w-16 md:h-16 flex items-center font-extrabold justify-center text-4xl cursor-default select-none
+                ${(Math.floor(index / 8) + index) % 2 === 0 ? 'bg-zinc-500 hover:bg-zinc-300' : 'bg-zinc-700 hover:bg-zinc-200'}
                 ${selectedPiece === index ? 'ring-4 ring-blue-500' : ''}
-                ${piece?.color === 'white' ? 'text-white' : 'text-black'}`}
+                `}
               onClick={() => handlePieceClick(index)}
             >
-              {piece && getCharacterSymbol(piece)}
+              {piece && <img className={'w-full h-full md:w-1/2 md:h-1/2 ' + (piece.color === 'white' ? 'invert' : '')}
+              src={getCharacterSymbol(piece)}></img>}
             </div>
           ))}
         </div>
