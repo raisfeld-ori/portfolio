@@ -389,7 +389,7 @@ export function MagicCard() {
           </div>
           <div className='grid grid-cols-1 align-middle md:grid-cols-3 lg:grid-cols-4'>
               {turn.deck.map((card, index) => (
-                <Card className="hover:rotate-12 transition-all ml-auto mr-auto" card={card} key={index} handleSelect={() => {
+                <Card className="hover:rotate-3 transition-all ml-auto mr-auto" card={card} key={index} handleSelect={() => {
                   if (turn.name === player1.name) {
                     setPlayer1({
                       ...player1,
