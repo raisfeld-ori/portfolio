@@ -237,15 +237,16 @@ export function PlayerZone({ player, isTurn, onChoiceAction }: { player: Player,
             className="rounded-full"
           />
           <div className="flex-1">
-            <h2 className="text-2xl font-bold">{player.name} ({player.shield && '🛡️'}{player.poisonCounter && player.poisonCounter != 0 && ('🤢+' + player.poisonCounter)})</h2>
+            <h2 className="text-2xl font-bold">{player.name} ({player.shield && '🛡️'}{player.poisonCounter && player.poisonCounter != 0 && ('🤢')}{player.mana && player.mana != 0 && '🌟'})</h2>
             <div className="flex items-center space-x-2">
               <div className="w-full bg-gray-300 rounded-full h-2.5">
                 <div 
-                  className={"bg-green-600 h-2.5 rounded-full " + (player.mana ? 'bg-blue-500' : '')}
+                  className={"bg-green-600 h-2.5 rounded-full " + (player.mana && player.mana != 0 && 'bg-blue-500')}
                   style={{ width: `${player.health + (player.mana || 0)}%` }}
                 ></div>
               </div>
-              <span className="text-sm font-medium">{player.health} HP {player.mana ? `+ ${player.mana}` : ''}</span>
+              <span className="text-sm font-medium">{player.health} HP</span>
+              {player.mana && player.mana != 0 && <span className="text-sm font-medium">{player.mana} Mana</span>}
             </div>
           </div>
         </div>
@@ -303,7 +304,7 @@ export function DeadPlayerZone({ player, isTurn, onChoiceAction }: { player: Pla
 }
 
 const attack = (card: MagicCard, player: Player) => {
-  let damage = card.damage - (player.mana || 0);
+  let damage = Math.max(card.damage - (player.mana || 0), 0);
   if (player.mana){player.mana -= 1;if (player.mana <= 0) {player.mana = undefined;}}
   if (player.activeCards.length == 0){
     if (player.shield){
