@@ -66,6 +66,7 @@ export interface MagicCard {
   image: string;
   damage: number;
   health: number;
+  realHealth: number;
   uniqueAbility: UniqueAbility;
 }
 
@@ -93,6 +94,7 @@ const allCards: MagicCard[] = [
     name: "Tio",
     image: makeCharacter(),
     damage: 7,
+    realHealth: 3,
     health: 3,
     uniqueAbility: UniqueAbility.Fireball,
   },
@@ -100,6 +102,7 @@ const allCards: MagicCard[] = [
     name: "Aviv",
     image: makeCharacter(),
     damage: 0,
+    realHealth: 10,
     health: 10,
     uniqueAbility: UniqueAbility.Poison,
   },
@@ -107,6 +110,7 @@ const allCards: MagicCard[] = [
     name: "Ariel",
     image: makeCharacter(),
     damage: 3,
+    realHealth: 8,
     health: 8,
     uniqueAbility: UniqueAbility.Shield,
   },
@@ -114,20 +118,23 @@ const allCards: MagicCard[] = [
     name: "Ori",
     image: makeCharacter(),
     damage: 5,
+    realHealth: 10,
     health: 10,
     uniqueAbility: UniqueAbility.ManaBoost,
   },
   {
     name: "Tal",
     image: makeCharacter(),
-    damage: 1,
-    health: 1,
+    damage: 0,
+    realHealth: 20,
+    health: 20,
     uniqueAbility: UniqueAbility.Bomber,
   },
   {
     name: "Yoshihara",
     image: makeCharacter(),
-    damage: 100,
+    damage: 5,
+    realHealth: 5,
     health: 5,
     uniqueAbility: UniqueAbility.ManaBoost,
   },
@@ -135,6 +142,7 @@ const allCards: MagicCard[] = [
     name: "Iran",
     image: makeCharacter(),
     damage: 3,
+    realHealth: 2,
     health: 2,
     uniqueAbility: UniqueAbility.Fireball,
   },
@@ -142,6 +150,7 @@ const allCards: MagicCard[] = [
     name: "Eshel",
     image: makeCharacter(),
     damage: 3,
+    realHealth: 7,
     health: 7,
     uniqueAbility: UniqueAbility.Heal,
   },
@@ -149,6 +158,7 @@ const allCards: MagicCard[] = [
     name: "Amos",
     image: makeCharacter(),
     damage: 2,
+    realHealth: 10,
     health: 10,
     uniqueAbility: UniqueAbility.Shield,
   },
@@ -156,6 +166,7 @@ const allCards: MagicCard[] = [
     name: "Toxic Alchemist",
     image: makeCharacter(),
     damage: 4,
+    realHealth: 3,
     health: 3,
     uniqueAbility: UniqueAbility.Poison,
   },
@@ -163,6 +174,7 @@ const allCards: MagicCard[] = [
     name: "Dual-Blade Warrior",
     image: makeCharacter(),
     damage: 6,
+    realHealth: 5,
     health: 5,
     uniqueAbility: UniqueAbility.Poison,
   },
@@ -170,6 +182,7 @@ const allCards: MagicCard[] = [
     name: "Mana Spirit",
     image: makeCharacter(),
     damage: 3,
+    realHealth: 4,
     health: 4,
     uniqueAbility: UniqueAbility.ManaBoost,
   },
@@ -177,6 +190,7 @@ const allCards: MagicCard[] = [
     name: "Gurdian Angel",
     image: makeCharacter(),
     damage: 0,
+    realHealth: 13,
     health: 13,
     uniqueAbility: UniqueAbility.Heal,
   }
@@ -301,11 +315,11 @@ const attack = (card: MagicCard, player: Player) => {
     }
   } else {
     let activeCards = player.activeCards;
-    let prevHealth = activeCards[activeCards.length - 1].health;
     activeCards[activeCards.length - 1].health -= damage;
     if (activeCards[player.activeCards.length - 1].health < 1){
-      activeCards[player.activeCards.length - 1].health = prevHealth + 2;
-      activeCards.pop();}
+      activeCards[player.activeCards.length - 1].health = activeCards[player.activeCards.length - 1].realHealth;
+      activeCards.pop();
+    }
     player.activeCards = activeCards;
   };
   return player;
