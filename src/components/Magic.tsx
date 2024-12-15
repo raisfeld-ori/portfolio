@@ -41,7 +41,7 @@ function useUniqueAbility(card: MagicCard, currentPlayer: Player, opponent: Play
       break;
     case UniqueAbility.ManaBoost:
       // Mana increses damage
-      newCurrentPlayer.mana = (newCurrentPlayer.mana || 0) + 4;
+      newCurrentPlayer.mana = Math.min((newCurrentPlayer.mana || 0) + 3, 15);
       break;
     default:
       throw new Error('Unknown ability');
@@ -342,9 +342,11 @@ export function MagicCard() {
     activeCards: []
   })
   const [turn, setTurn] = useState(player1);
+  const [addedCard, setAddedCard] = useState<boolean>(false);
   const [gameOver, setGameOver] = useState(false);
 
   useEffect(() => {
+    setAddedCard(false);
     if (player1.poisonCounter){setPlayer1({...player1, health: player1.health - 2, poisonCounter: player1.poisonCounter - 1});}
     if (player1.mana){setPlayer1({...player1, mana: player1.mana - 1});}
     if (player2.poisonCounter){setPlayer2({...player2, health: player2.health - 2, poisonCounter: player2.poisonCounter - 1});}
@@ -405,7 +407,7 @@ export function MagicCard() {
           <div className='grid grid-cols-1 align-middle md:grid-cols-3 lg:grid-cols-4'>
               {turn.deck.map((card, index) => (
                 <Card className="hover:rotate-3 transition-all ml-auto mr-auto" card={card} key={index} handleSelect={() => {
-                  if (turn.name === player1.name) {
+                  if (turn.name === player1.name && !addedCard) {
                     setPlayer1({
                       ...player1,
                       activeCards: [...player1.activeCards, player1.deck[index]],
@@ -418,7 +420,7 @@ export function MagicCard() {
                       deck: player2.deck.filter((_, i) => i !== index)
                     })
                   }
-                  setTurn(turn.name === player1.name ? player2 : player1)
+                  setAddedCard(true);
                 }}></Card>
               ))}
           </div>
