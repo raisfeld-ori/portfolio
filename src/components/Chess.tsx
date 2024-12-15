@@ -207,10 +207,6 @@ function Move(piece: number, target: number, board: (Character | null)[]): (Char
           }
         }
         
-        // Check king doesn't pass through or end in check
-        // TODO: Implement check detection logic
-        
-        // Perform castling move
         newBoard[target] = { ...currentPiece, hasMoved: true };
         newBoard[piece] = null;
         newBoard[rookTargetIndex] = { ...rook, hasMoved: true };
