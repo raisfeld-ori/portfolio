@@ -407,7 +407,8 @@ export function MagicCard() {
           <div className='grid grid-cols-1 align-middle md:grid-cols-3 lg:grid-cols-4'>
               {turn.deck.map((card, index) => (
                 <Card className="hover:rotate-3 transition-all ml-auto mr-auto" card={card} key={index} handleSelect={() => {
-                  if (turn.name === player1.name && !addedCard) {
+                  if (addedCard){return;}
+                  if (turn.name === player1.name) {
                     setPlayer1({
                       ...player1,
                       activeCards: [...player1.activeCards, player1.deck[index]],
@@ -420,6 +421,7 @@ export function MagicCard() {
                       deck: player2.deck.filter((_, i) => i !== index)
                     })
                   }
+                  setTurn({...turn, deck: turn.deck.filter((_, i) => i !== index)})
                   setAddedCard(true);
                 }}></Card>
               ))}
