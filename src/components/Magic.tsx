@@ -354,7 +354,7 @@ export function MagicCard() {
     if (player1.health <= 0 || player2.health <= 0){
       setGameOver(true);
     }
-  }, [turn])
+  }, [turn.name])
   if (gameOver){
     return (
       <div className="min-h-screen">
