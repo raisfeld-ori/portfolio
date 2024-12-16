@@ -31,6 +31,13 @@ export default function About() {
             <h3 className='text-center absolute w-64 -translate-y-32 text-2xl font-bold'>Magic Cards</h3>
             </a>
         </div>
+        <div className='h-64 w-64 m-5'>
+          <a href='/games/dinochicken'>
+          <Image alt='' className='h-full w-full blur-sm opacity-45' src={CardsImage}>
+            </Image>
+            <h3 className='text-center absolute w-64 -translate-y-32 text-2xl font-bold'>Magic Cards</h3>
+            </a>
+        </div>
       </div>
     </Container>
   )
