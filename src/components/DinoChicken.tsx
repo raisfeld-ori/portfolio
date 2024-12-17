@@ -156,10 +156,17 @@ class JumpingPlatform extends Platform {
 }
 
 class Obstacle {
-    position = { x: 0, y: 0 };
-    speed = 5;
-    width = 20;
-    height = 20;
+    position: { x: number, y: number };
+    speed: number;
+    width: number;
+    height: number;
+
+    constructor(x: number, y: number, speed: number, width: number, height: number) {
+        this.position = { x, y };
+        this.speed = speed;
+        this.width = width;
+        this.height = height;
+    }
 
     update() {
         this.position.x -= this.speed;
@@ -180,7 +187,7 @@ const DinoChicken = () => {
     }, []);
 
     const [player] = useState(new Player(100, 400, 50, 50));
-    const [obstacles] = useState([new Obstacle(), new Obstacle()]);
+    const [obstacles] = useState([new Obstacle(300, 400, 5, 50, 50), new Obstacle(400, 150, 2, 50, 50)]);
     const [platforms] = useState([
         new JumpingPlatform(300, 300, 150, 20, 10),
         new Platform(100, 500, 200, 20),
