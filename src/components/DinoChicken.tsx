@@ -1,11 +1,13 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
+import idle from '@/images/Character/Jump (32x32).png';
 
 class Player {
     position: { x: number, y: number };
     velocity: {x: number, y: number};
     jumpHeight: number;
     gravity: number;
+    friction: number;
     width: number;
     height: number;
     gameOver: boolean;
@@ -16,6 +18,7 @@ class Player {
         this.velocity = { x: 0, y: 0 };
         this.jumpHeight = -25;
         this.gravity = 1;
+        this.friction = 0;
         this.width = width;
         this.height = height;
         this.gameOver = false;
@@ -30,13 +33,11 @@ class Player {
     }
 
     moveLeft() {
-        this.velocity.x = -10;
-        this.position.x += this.velocity.x;
+        this.velocity.x = -5;
     }
 
     moveRight() {
-        this.velocity.x = 10;
-        this.position.x += this.velocity.x;
+        this.velocity.x = 5;
     }
 
     update(platforms: Platform[]): void {
@@ -47,16 +48,24 @@ class Player {
             if (this.checkCollision(platform)) {
                 if (this.velocity.y > 0) {
                     this.position.y = platform.position.y - this.height;
+                    this.friction += this.velocity.x;
                     this.velocity.x = 0;
                     this.isGrounded = true;
                 }
             }
         });
-       
         if (!this.isGrounded) {
             this.velocity.y += this.gravity;
             this.position.x += this.velocity.x;
             this.position.y += this.velocity.y;
+        }
+        else if (this.isGrounded){
+            this.position.x += this.friction;
+            if (this.friction > 0){
+                this.friction -= 0.5;
+            } else if (this.friction < 0){
+                this.friction += 0.5;
+            }
         }
 
         if (this.position.y + this.height > window.innerHeight) {
@@ -73,13 +82,18 @@ class Player {
         const isVerticalCollision =
             this.position.y + this.height <= platform.position.y &&
             this.position.y + this.height + this.velocity.y >= platform.position.y;
+        
+        const isTopCollision =
+            this.position.y - this.height <= platform.position.y &&
+            this.position.y - this.height + this.velocity.y >= platform.position.y;
 
-        return isHorizontalCollision && isVerticalCollision;
+        return (isHorizontalCollision && isVerticalCollision) || (isHorizontalCollision && isTopCollision);
     }
 
     draw(ctx: CanvasRenderingContext2D) {
-        ctx.fillStyle = "blue";
-        ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+        const image = new Image();
+        image.src = idle.src;
+        ctx.drawImage(image, this.position.x, this.position.y, this.width, this.height);
     }
 }
 
@@ -265,7 +279,7 @@ const DinoChicken = () => {
         return <div>Loading...</div>;
     }
 
-    return <canvas ref={canvasRef}></canvas>;
+    return <canvas className='h-full w-full' ref={canvasRef}></canvas>;
 };
 
 export default DinoChicken;
