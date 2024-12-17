@@ -3,58 +3,65 @@ import React, { useEffect, useRef, useState } from 'react';
 
 class Player {
     position: { x: number, y: number };
-    velocity: number;
+    velocity: {x: number, y: number};
     jumpHeight: number;
     gravity: number;
     width: number;
     height: number;
+    gameOver: boolean;
     isGrounded: boolean;
 
     constructor(x: number, y: number, width: number, height: number) {
         this.position = { x, y };
-        this.velocity = 0;
-        this.jumpHeight = -10;
+        this.velocity = { x: 0, y: 0 };
+        this.jumpHeight = -25;
         this.gravity = 1;
         this.width = width;
         this.height = height;
+        this.gameOver = false;
         this.isGrounded = false;
     }
 
     jump() {
         if (this.isGrounded) {  
-            this.velocity = this.jumpHeight;
+            this.velocity.y = this.jumpHeight;
             this.isGrounded = false;
         }
     }
 
     moveLeft() {
-        this.position.x -= 5;
+        this.velocity.x = -10;
+        this.position.x += this.velocity.x;
     }
 
     moveRight() {
-        this.position.x += 5;
+        this.velocity.x = 10;
+        this.position.x += this.velocity.x;
     }
 
     update(platforms: Platform[]): void {
+        if (this.gameOver) return;
         this.isGrounded = false;
 
         platforms.forEach((platform) => {
             if (this.checkCollision(platform)) {
-                if (this.velocity > 0) {
+                if (this.velocity.y > 0) {
                     this.position.y = platform.position.y - this.height;
+                    this.velocity.x = 0;
                     this.isGrounded = true;
                 }
             }
         });
        
         if (!this.isGrounded) {
-            this.velocity += this.gravity;
-            this.position.y += this.velocity;
-        } 
-        if (this.position.y > window.innerHeight - this.height) {
-            this.position.y = window.innerHeight - this.height;
-            this.velocity = 0; 
-            this.isGrounded = true;
+            this.velocity.y += this.gravity;
+            this.position.x += this.velocity.x;
+            this.position.y += this.velocity.y;
+        }
+
+        if (this.position.y + this.height > window.innerHeight) {
+            this.gameOver = true;
+            console.log("Game Over");
         }
     }
 
@@ -65,7 +72,7 @@ class Player {
 
         const isVerticalCollision =
             this.position.y + this.height <= platform.position.y &&
-            this.position.y + this.height + this.velocity >= platform.position.y;
+            this.position.y + this.height + this.velocity.y >= platform.position.y;
 
         return isHorizontalCollision && isVerticalCollision;
     }
@@ -114,7 +121,7 @@ class MovingPlatform extends Platform {
         this.position.y += this.speed.y;
 
         if (this.position.x < 0 || this.position.x + this.width > canvasWidth) {
-            this.speed.x *= -1;
+            this.speed.x -= this.speed.x * 2;
         }
 
         if (this.position.y < 0 || this.position.y + this.height > canvasHeight) {
@@ -137,10 +144,8 @@ class JumpingPlatform extends Platform {
     }
 
     update(player: Player): void {
-        if (player.position.x + player.width > this.position.x && player.position.x < this.position.x + this.width) {
-            if (player.position.y + player.height === this.position.y) {
-                player.velocity = this.jumpHeight;
-            }
+        if (player.checkCollision(this)) {
+            player.jump();
         }
     }
 
@@ -175,10 +180,11 @@ const DinoChicken = () => {
     }, []);
 
     const [player] = useState(new Player(100, 400, 50, 50));
+    const [obstacles] = useState([new Obstacle(), new Obstacle()]);
     const [platforms] = useState([
-        new JumpingPlatform(100, 500, 150, 20, 10),
-        new Platform(300, 300, 200, 20),
-        new MovingPlatform(500, 100, 100, 20, { x: 5, y: 5 })
+        new JumpingPlatform(300, 300, 150, 20, 10),
+        new Platform(100, 500, 200, 20),
+        new MovingPlatform(500, 100, 100, 20, { x: 5, y: 0 })
     ]);
 
     const updateGame = () => {
@@ -193,7 +199,22 @@ const DinoChicken = () => {
 
                 platforms.forEach((platform) => {
                     platform.draw(ctx);
+                    if (platform === platforms[2]) {
+                        (platform as MovingPlatform).update(
+                            canvasRef.current?.width ?? 0,
+                            canvasRef.current?.height ?? 0
+                        );
+                    }
+                    if (platform === platforms[0]) {
+                        (platform as JumpingPlatform).update(player);
+                    }
+
                 });
+
+                obstacles.forEach((obstacle) => {
+                    obstacle.update();
+                    obstacle.draw(ctx);
+                })
             }
         }
 
