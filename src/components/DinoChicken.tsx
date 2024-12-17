@@ -12,6 +12,9 @@ class Player {
     height: number;
     gameOver: boolean;
     isGrounded: boolean;
+    abilityCooldown: boolean;
+    abiltyCooldownTime: number;
+    lastAbility: number;
 
     constructor(x: number, y: number, width: number, height: number) {
         this.position = { x, y };
@@ -23,6 +26,9 @@ class Player {
         this.height = height;
         this.gameOver = false;
         this.isGrounded = false;
+        this.abilityCooldown = false;
+        this.abiltyCooldownTime = 3000;
+        this.lastAbility = 0;
     }
 
     jump() {
@@ -38,6 +44,12 @@ class Player {
 
     moveRight() {
         this.velocity.x = 5;
+    }
+
+    dash() {
+        this.velocity.x = 30;
+        console.log('dashing');
+        
     }
 
     update(platforms: Platform[]): void {
@@ -59,6 +71,8 @@ class Player {
             this.position.x += this.velocity.x;
             this.position.y += this.velocity.y;
         }
+        
+        
         else if (this.isGrounded){
             this.position.x += this.friction;
             if (this.friction > 0){
@@ -67,7 +81,21 @@ class Player {
                 this.friction += 0.5;
             }
         }
+        const currentTime = Date.now();
 
+       if(!this.abilityCooldown || currentTime - this.lastAbility > this.abiltyCooldownTime) {
+           console.log('Ability used!');
+           this.lastAbility = currentTime;
+           this.abilityCooldown = true;
+
+           setTimeout(() => {
+               this.abilityCooldown = false;
+               console.log('Ability cooldown complete!');
+           }, this.abiltyCooldownTime);
+        } else {
+            console.log('Ability is on cooldown!');
+        }
+        
         if (this.position.y + this.height > window.innerHeight) {
             this.gameOver = true;
             console.log("Game Over");
@@ -83,11 +111,11 @@ class Player {
             this.position.y + this.height <= platform.position.y &&
             this.position.y + this.height + this.velocity.y >= platform.position.y;
         
-        const isTopCollision =
-            this.position.y - this.height <= platform.position.y &&
-            this.position.y - this.height + this.velocity.y >= platform.position.y;
+        const isBottomCollision =
+            this.position.y <= platform.position.y + platform.height &&
+            this.position.y + this.velocity.y >= platform.position.y + platform.height;
 
-        return (isHorizontalCollision && isVerticalCollision) || (isHorizontalCollision && isTopCollision);
+        return (isHorizontalCollision && isVerticalCollision) || (isHorizontalCollision && isBottomCollision);
     }
 
     draw(ctx: CanvasRenderingContext2D) {
@@ -204,41 +232,38 @@ const DinoChicken = () => {
     const [obstacles] = useState([new Obstacle(300, 400, 5, 50, 50), new Obstacle(400, 150, 2, 50, 50)]);
     const [platforms] = useState([
         new JumpingPlatform(300, 300, 150, 20, 10),
+        new Platform(150, 600, 200, 20),
+        new MovingPlatform(500, 100, 100, 20, { x: 5, y: 0 }),
         new Platform(100, 500, 200, 20),
-        new MovingPlatform(500, 100, 100, 20, { x: 5, y: 0 })
     ]);
 
     const updateGame = () => {
         if (canvasRef.current) {
             const ctx = canvasRef.current.getContext("2d");
-
+    
             if (ctx) {
                 ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-
+    
                 player.update(platforms);
                 player.draw(ctx);
-
+    
                 platforms.forEach((platform) => {
                     platform.draw(ctx);
-                    if (platform === platforms[2]) {
-                        (platform as MovingPlatform).update(
-                            canvasRef.current?.width ?? 0,
-                            canvasRef.current?.height ?? 0
-                        );
+    
+                    if (platform instanceof MovingPlatform) {
+                        platform.update(canvasRef.current?.width ?? 0, canvasRef.current?.height ?? 0);
+                    } else if (platform instanceof JumpingPlatform) {
+                        platform.update(player);
                     }
-                    if (platform === platforms[0]) {
-                        (platform as JumpingPlatform).update(player);
-                    }
-
                 });
-
+    
                 obstacles.forEach((obstacle) => {
                     obstacle.update();
                     obstacle.draw(ctx);
-                })
+                });
             }
         }
-
+    
         requestAnimationFrame(updateGame);
     };
 
@@ -262,6 +287,9 @@ const DinoChicken = () => {
         }
         if (event.key === "a" || event.key === "ArrowLeft") {
             player.moveLeft();
+        }
+        if (event.key === "q"){
+            player.dash();
         }
     };
 
