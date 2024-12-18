@@ -52,7 +52,7 @@ class Player {
         
     }
 
-    update(platforms: Platform[]): void {
+    update(platforms: Platform[], obstacles: Obstacle[]): void {
         if (this.gameOver) return;
         this.isGrounded = false;
 
@@ -105,7 +105,7 @@ class Player {
         
         if (this.position.y + this.height > window.innerHeight) {
             this.gameOver = true;
-            console.log("Game Over");
+            
         }
     }
 
@@ -143,14 +143,6 @@ class Platform {
         this.position = { x, y };
         this.width = width;
         this.height = height;
-    }
-
-    isPlayerOnPlatform(player: Player): boolean {
-        return (
-            player.position.y + player.height === this.position.y &&
-            player.position.x + player.width > this.position.x &&
-            player.position.x < this.position.x + this.width
-        );
     }
 
     draw(ctx: CanvasRenderingContext2D) {
@@ -238,7 +230,7 @@ const DinoChicken = () => {
     }, []);
 
     const [player] = useState(new Player(100, 400, 50, 50));
-    const [obstacles] = useState([new Obstacle(300, 400, 5, 50, 50), new Obstacle(400, 150, 2, 50, 50)]);
+    const [obstacles] = useState([new Obstacle(300, 300, 5, 50, 50), new Obstacle(400, 150, 2, 50, 50)]);
     const [platforms] = useState([
         new JumpingPlatform(300, 300, 150, 20, 10),
         new Platform(150, 600, 200, 20),
@@ -249,27 +241,44 @@ const DinoChicken = () => {
     const updateGame = () => {
         if (canvasRef.current) {
             const ctx = canvasRef.current.getContext("2d");
+            const renderGameOverScreen = (ctx: CanvasRenderingContext2D) => {
+                ctx.fillStyle = "rgba(114, 104, 104, 0.8)"; // Semi-transparent background
+                ctx.fillRect(0, 0, canvasRef.current?.width ?? 0, canvasRef.current?.height ?? 0);
+            
+                ctx.fillStyle = "white";
+                ctx.font = "48px Arial";
+                ctx.textAlign = "center";
+                ctx.fillText("Game Over", (canvasRef.current?.width ?? 0) / 2, (canvasRef.current?.height ?? 0) / 2 - 20);
+                ctx.font = "24px Arial";
+                ctx.fillText("Press R to Restart", (canvasRef.current?.width ?? 0) / 2, (canvasRef.current?.height ?? 0) / 2 + 30);
+            };
     
             if (ctx) {
                 ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+                if (!player.gameOver) {
+                    player.update(platforms, obstacles);
+                    player.draw(ctx);
     
-                player.update(platforms);
-                player.draw(ctx);
-    
-                platforms.forEach((platform) => {
-                    platform.draw(ctx);
-    
-                    if (platform instanceof MovingPlatform) {
+                    platforms.forEach((platform) => {
+                        platform.draw(ctx);
+                        if (platform instanceof MovingPlatform) {   
                         platform.update(canvasRef.current?.width ?? 0, canvasRef.current?.height ?? 0);
-                    } else if (platform instanceof JumpingPlatform) {
+                        }   
+                        else if (platform instanceof JumpingPlatform) {
                         platform.update(player);
-                    }
+                        }
                 });
     
                 obstacles.forEach((obstacle) => {
                     obstacle.update();
                     obstacle.draw(ctx);
                 });
+                }
+                else if (player.gameOver) {
+                    renderGameOverScreen(ctx);
+                }
+    
+                
             }
         }
     
@@ -287,6 +296,15 @@ const DinoChicken = () => {
         }
     }, [isClient, player, platforms]);
 
+    const restartGame = () => {
+        player.gameOver = false;
+        
+        player.position = { x: 100, y: 400 };
+        player.velocity = { x: 0, y: 0 };
+        player.friction = 0;
+    
+    };
+
     const handleKeyDown = (event: KeyboardEvent) => {
         if ((event.key === "w" || event.key === "ArrowUp")) {
             player.jump();
@@ -299,6 +317,9 @@ const DinoChicken = () => {
         }
         if (event.key === "q"){
             player.dash();
+        }
+        if (event.key === "r" && player.gameOver) {
+            restartGame();
         }
     };
 
