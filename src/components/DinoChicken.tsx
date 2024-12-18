@@ -64,6 +64,13 @@ class Player {
                     this.velocity.x = 0;
                     this.isGrounded = true;
                 }
+                const isBottomCollision =
+                this.position.y >= platform.position.y + platform.height &&
+                this.position.y + this.velocity.y <= platform.position.y + platform.height;
+                if (isBottomCollision) {
+                    this.velocity.y = 0;
+                    this.position.y = platform.position.y + platform.height;
+                }
             }
         });
         if (!this.isGrounded) {
@@ -110,12 +117,14 @@ class Player {
         const isVerticalCollision =
             this.position.y + this.height <= platform.position.y &&
             this.position.y + this.height + this.velocity.y >= platform.position.y;
-        
+            
+        // Still needed even if it is implemented again in the update function.
         const isBottomCollision =
-            this.position.y <= platform.position.y + platform.height &&
-            this.position.y + this.velocity.y >= platform.position.y + platform.height;
+            this.position.y >= platform.position.y + platform.height &&
+            this.position.y + this.velocity.y <= platform.position.y + platform.height;
 
-        return (isHorizontalCollision && isVerticalCollision) || (isHorizontalCollision && isBottomCollision);
+        return (isHorizontalCollision && isVerticalCollision) ||
+         (isHorizontalCollision && isBottomCollision);
     }
 
     draw(ctx: CanvasRenderingContext2D) {
