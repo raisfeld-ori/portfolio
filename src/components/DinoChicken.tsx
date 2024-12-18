@@ -90,7 +90,7 @@ class Player {
         }
         const currentTime = Date.now();
 
-       if(!this.abilityCooldown || currentTime - this.lastAbility > this.abiltyCooldownTime) {
+       if (!this.abilityCooldown || currentTime - this.lastAbility > this.abiltyCooldownTime) {
            console.log('Ability used!');
            this.lastAbility = currentTime;
            this.abilityCooldown = true;
@@ -99,13 +99,13 @@ class Player {
                this.abilityCooldown = false;
                console.log('Ability cooldown complete!');
            }, this.abiltyCooldownTime);
+
         } else {
             console.log('Ability is on cooldown!');
         }
         
         if (this.position.y + this.height > window.innerHeight) {
             this.gameOver = true;
-            
         }
     }
 
@@ -242,7 +242,7 @@ const DinoChicken = () => {
         if (canvasRef.current) {
             const ctx = canvasRef.current.getContext("2d");
             const renderGameOverScreen = (ctx: CanvasRenderingContext2D) => {
-                ctx.fillStyle = "rgba(114, 104, 104, 0.8)"; // Semi-transparent background
+                ctx.fillStyle = "rgba(114, 104, 104, 0.8)"; 
                 ctx.fillRect(0, 0, canvasRef.current?.width ?? 0, canvasRef.current?.height ?? 0);
             
                 ctx.fillStyle = "white";
@@ -262,10 +262,10 @@ const DinoChicken = () => {
                     platforms.forEach((platform) => {
                         platform.draw(ctx);
                         if (platform instanceof MovingPlatform) {   
-                        platform.update(canvasRef.current?.width ?? 0, canvasRef.current?.height ?? 0);
+                            platform.update(canvasRef.current?.width ?? 0, canvasRef.current?.height ?? 0);
                         }   
                         else if (platform instanceof JumpingPlatform) {
-                        platform.update(player);
+                            platform.update(player);
                         }
                 });
     
@@ -274,7 +274,7 @@ const DinoChicken = () => {
                     obstacle.draw(ctx);
                 });
                 }
-                else if (player.gameOver) {
+                else {
                     renderGameOverScreen(ctx);
                 }
     
