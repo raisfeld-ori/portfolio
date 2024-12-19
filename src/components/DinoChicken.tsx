@@ -225,7 +225,7 @@ const DinoChicken = () => {
     }, []);
 
     const player = new Player(100, 400, 50, 50);
-    let shouldAddPlatforms = false;
+    let shouldAddPlatforms = true;
     const obstacles = [new Obstacle(300, 300, 5, 50, 50), new Obstacle(400, 150, 2, 50, 50)];
     let platforms = [
         new JumpingPlatform(300, 300, 150, 20, 10),
@@ -234,22 +234,17 @@ const DinoChicken = () => {
         new Platform(100, 500, 200, 20),
     ];
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            shouldAddPlatforms = true;
-        }, 3000);
-        return clearInterval(interval);
-    }, [])
-
     const updatePlatforms = () => {
         let playerX = player.position.x;
 
         platforms = platforms.filter((platform) => {
             return platform.position.x > (playerX - 700);
         })
-        if (!platforms.some((platform) => platform.position.x > (playerX + 700))){
+        console.log(shouldAddPlatforms)
+        if (!platforms.some((platform) => platform.position.x > (playerX + 700)) && shouldAddPlatforms){
             shouldAddPlatforms = false;
-            platforms.push(new Platform(playerX + 300, 600, 200, 100))
+            setTimeout(() => {shouldAddPlatforms = true;}, 2000)
+            platforms.push(new Platform(playerX + 300, 600 - (Math.random() * 100), 200, 100))
         }
     }
 
