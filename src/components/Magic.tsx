@@ -193,12 +193,119 @@ const allCards: MagicCard[] = [
     realHealth: 13,
     health: 13,
     uniqueAbility: UniqueAbility.Heal,
+  },
+  {
+    name: "Tio",
+    image: makeCharacter(),
+    damage: 7,
+    realHealth: 3,
+    health: 3,
+    uniqueAbility: UniqueAbility.Fireball,
+  },
+  {
+    name: "Aviv",
+    image: makeCharacter(),
+    damage: 0,
+    realHealth: 10,
+    health: 10,
+    uniqueAbility: UniqueAbility.Poison,
+  },
+  {
+    name: "Ariel",
+    image: makeCharacter(),
+    damage: 3,
+    realHealth: 8,
+    health: 8,
+    uniqueAbility: UniqueAbility.Shield,
+  },
+  {
+    name: "Ori",
+    image: makeCharacter(),
+    damage: 5,
+    realHealth: 10,
+    health: 10,
+    uniqueAbility: UniqueAbility.ManaBoost,
+  },
+  {
+    name: "Tal",
+    image: makeCharacter(),
+    damage: 0,
+    realHealth: 20,
+    health: 20,
+    uniqueAbility: UniqueAbility.Bomber,
+  },
+  {
+    name: "Yoshihara",
+    image: makeCharacter(),
+    damage: 5,
+    realHealth: 5,
+    health: 5,
+    uniqueAbility: UniqueAbility.ManaBoost,
+  },
+  {
+    name: "Iran",
+    image: makeCharacter(),
+    damage: 3,
+    realHealth: 2,
+    health: 2,
+    uniqueAbility: UniqueAbility.Fireball,
+  },
+  {
+    name: "Eshel",
+    image: makeCharacter(),
+    damage: 3,
+    realHealth: 7,
+    health: 7,
+    uniqueAbility: UniqueAbility.Heal,
+  },
+  {
+    name: "Amos",
+    image: makeCharacter(),
+    damage: 2,
+    realHealth: 10,
+    health: 10,
+    uniqueAbility: UniqueAbility.Shield,
+  },
+  {
+    name: "Toxic Alchemist",
+    image: makeCharacter(),
+    damage: 4,
+    realHealth: 3,
+    health: 3,
+    uniqueAbility: UniqueAbility.Poison,
+  },
+  {
+    name: "Dual-Blade Warrior",
+    image: makeCharacter(),
+    damage: 6,
+    realHealth: 5,
+    health: 5,
+    uniqueAbility: UniqueAbility.Poison,
+  },
+  {
+    name: "Mana Spirit",
+    image: makeCharacter(),
+    damage: 3,
+    realHealth: 4,
+    health: 4,
+    uniqueAbility: UniqueAbility.ManaBoost,
+  },
+  {
+    name: "Gurdian Angel",
+    image: makeCharacter(),
+    damage: 0,
+    realHealth: 13,
+    health: 13,
+    uniqueAbility: UniqueAbility.Heal,
   }
 ];
-
+let usedCards: MagicCard[] = [];
 
 const makeDeck = (deckCards: number): MagicCard[] => {
-  return Array.from({ length: deckCards }, () => (allCards[Math.floor(Math.random() * allCards.length)]));
+  return Array.from({ length: deckCards }, () => {
+    const card = allCards[Math.floor(Math.random() * allCards.length)];
+    if (!usedCards.includes(card)){usedCards.push(card);return card;}
+  }).filter((c) => !!c) as MagicCard[];
 }
 
 const Card = ({ card, className, handleSelect } : { card: MagicCard, className?: string, handleSelect?: () => void }) => {
@@ -344,13 +451,13 @@ export function MagicCard() {
   const [turn, setTurn] = useState(player1);
   const [addedCard, setAddedCard] = useState<boolean>(false);
   const [gameOver, setGameOver] = useState(false);
-
+  usedCards = [];
   useEffect(() => {
     setAddedCard(false);
     if (player1.poisonCounter){setPlayer1({...player1, health: player1.health - 2, poisonCounter: player1.poisonCounter - 1});}
-    if (player1.mana){setPlayer1({...player1, mana: player1.mana - 1});}
+    if (player1.mana){setPlayer1({...player1, mana: player1.mana - 0.5});}
     if (player2.poisonCounter){setPlayer2({...player2, health: player2.health - 2, poisonCounter: player2.poisonCounter - 1});}
-    if (player1.mana){setPlayer1({...player1, mana: player1.mana - 1});}
+    if (player2.mana){setPlayer2({...player2, mana: player2.mana - 0.5});}
     if (player1.health <= 0 || player2.health <= 0){
       setGameOver(true);
     }
