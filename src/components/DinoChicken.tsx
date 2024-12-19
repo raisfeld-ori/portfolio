@@ -48,7 +48,6 @@ class Player {
 
     dash() {
         this.velocity.x = 30;
-        console.log('dashing');
         
     }
 
@@ -91,17 +90,13 @@ class Player {
         const currentTime = Date.now();
 
        if (!this.abilityCooldown || currentTime - this.lastAbility > this.abiltyCooldownTime) {
-           console.log('Ability used!');
            this.lastAbility = currentTime;
            this.abilityCooldown = true;
 
            setTimeout(() => {
                this.abilityCooldown = false;
-               console.log('Ability cooldown complete!');
            }, this.abiltyCooldownTime);
 
-        } else {
-            console.log('Ability is on cooldown!');
         }
         
         if (this.position.y + this.height > window.innerHeight) {
@@ -229,14 +224,34 @@ const DinoChicken = () => {
         setIsClient(true);
     }, []);
 
-    const [player] = useState(new Player(100, 400, 50, 50));
-    const [obstacles] = useState([new Obstacle(300, 300, 5, 50, 50), new Obstacle(400, 150, 2, 50, 50)]);
-    const [platforms] = useState([
+    const player = new Player(100, 400, 50, 50);
+    let shouldAddPlatforms = false;
+    const obstacles = [new Obstacle(300, 300, 5, 50, 50), new Obstacle(400, 150, 2, 50, 50)];
+    let platforms = [
         new JumpingPlatform(300, 300, 150, 20, 10),
         new Platform(150, 600, 200, 20),
         new MovingPlatform(500, 100, 100, 20, { x: 5, y: 0 }),
         new Platform(100, 500, 200, 20),
-    ]);
+    ];
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            shouldAddPlatforms = true;
+        }, 3000);
+        return clearInterval(interval);
+    }, [])
+
+    const updatePlatforms = () => {
+        let playerX = player.position.x;
+
+        platforms = platforms.filter((platform) => {
+            return platform.position.x > (playerX - 700);
+        })
+        if (!platforms.some((platform) => platform.position.x > (playerX + 700))){
+            shouldAddPlatforms = false;
+            platforms.push(new Platform(playerX + 300, 600, 200, 100))
+        }
+    }
 
     const updateGame = () => {
         if (canvasRef.current) {
@@ -250,15 +265,15 @@ const DinoChicken = () => {
                 ctx.textAlign = "center";
                 ctx.fillText("Game Over", (canvasRef.current?.width ?? 0) / 2, (canvasRef.current?.height ?? 0) / 2 - 20);
                 ctx.font = "24px Arial";
-                ctx.fillText("Press R to Restart", (canvasRef.current?.width ?? 0) / 2, (canvasRef.current?.height ?? 0) / 2 + 30);
+                ctx.fillText("Score: " + (player.position.x - 100), (canvasRef.current?.width ?? 0) / 2, (canvasRef.current?.height ?? 0) / 2 + 30);
             };
     
             if (ctx) {
                 ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+                updatePlatforms();
                 if (!player.gameOver) {
                     player.update(platforms, obstacles);
                     player.draw(ctx);
-    
                     platforms.forEach((platform) => {
                         platform.draw(ctx);
                         if (platform instanceof MovingPlatform) {   
@@ -317,9 +332,6 @@ const DinoChicken = () => {
         }
         if (event.key === "q"){
             player.dash();
-        }
-        if (event.key === "r" && player.gameOver) {
-            restartGame();
         }
     };
 
