@@ -1,4 +1,15 @@
-import { MagicCard, makeCharacter, UniqueAbility } from "./Magic";
+import { MagicCard, makeCharacter } from "./Magic";
+
+export enum UniqueAbility {
+  Fireball = "Fireball",
+  Heal = "Heal",
+  Shield = "Shield",
+  Poison = "Poison",
+  Bomber = "Bomber",
+  ManaBoost = "Mana Boost",
+  ElectricBlast = "Electric Blast",
+  None = "None"
+}
 
 export const allCards: MagicCard[] = [
   {

@@ -4,18 +4,7 @@ import { useEffect, useState } from 'react';
 import { createAvatar } from '@dicebear/core';
 import { adventurer, shapes, croodles, croodlesNeutral, funEmoji, adventurerNeutral, avataaars, avataaarsNeutral, openPeeps, bottts, botttsNeutral } from '@dicebear/collection';
 import Image from 'next/image';
-import { allCards } from './characters';
-
-export enum UniqueAbility {
-  Fireball = "Fireball",
-  Heal = "Heal",
-  Shield = "Shield",
-  Poison = "Poison",
-  Bomber = "Bomber",
-  ManaBoost = "Mana Boost",
-  ElectricBlast = "Electric Blast",
-  None = "None"
-}
+import { allCards, UniqueAbility } from './characters';
 
 function useUniqueAbility(card: MagicCard, currentPlayer: Player, opponent: Player): [Player, Player] {
   let newCurrentPlayer = { ...currentPlayer };
