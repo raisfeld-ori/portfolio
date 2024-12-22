@@ -38,8 +38,12 @@ function useUniqueAbility(card: MagicCard, currentPlayer: Player, opponent: Play
       break;
     case UniqueAbility.ElectricBlast:
       if (newOpponent.shield){newOpponent.shield = false;}
+      else if (newOpponent.mana && newOpponent.mana > 0) {newOpponent.mana -= Math.max(newOpponent.activeCards.length, 0);}
       else {
-        newOpponent.activeCards.forEach((card) => card.health -= 2);
+        newOpponent.activeCards.forEach((card) => {
+          card.health -= 2;
+        });
+        newOpponent.activeCards.filter((card) => card.health > 0);
       }
       break;
     case UniqueAbility.None:
