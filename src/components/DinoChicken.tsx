@@ -1,5 +1,7 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
+import { createAvatar } from '@dicebear/core';
+import { adventurer, shapes, croodles, croodlesNeutral, funEmoji, adventurerNeutral, avataaars, avataaarsNeutral, openPeeps, bottts, botttsNeutral } from '@dicebear/collection';
 import idle from '@/images/Character/Jump (32x32).png';
 
 class Player {
@@ -130,7 +132,29 @@ class Player {
         ctx.drawImage(image, this.position.x, this.position.y, this.width, this.height);
     }
 }
+class Enemy{
+    position: { x: number; y: number };
+    width: number;
+    height: number;
+    speed: number;
 
+    constructor(x: number, y: number, width: number, height: number, speed: number) {
+        this.position = { x, y };
+        this.width = width;
+        this.height = height;
+        this.speed = speed;
+    }
+
+    update(player: Player) {
+        this.position.x -= this.speed;
+
+    }
+    
+    draw(ctx: CanvasRenderingContext2D) {
+        ctx.fillStyle = "red";
+        ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+    }
+}
 class Platform {
     position: { x: number; y: number };
     width: number;
