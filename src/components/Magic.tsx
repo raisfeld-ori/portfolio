@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { createAvatar } from '@dicebear/core';
 import { adventurer, shapes, croodles, croodlesNeutral, funEmoji, adventurerNeutral, avataaars, avataaarsNeutral, openPeeps, bottts, botttsNeutral } from '@dicebear/collection';
 import Image from 'next/image';
+import { allCards } from './characters';
 
 export enum UniqueAbility {
   Fireball = "Fireball",
@@ -12,6 +13,8 @@ export enum UniqueAbility {
   Poison = "Poison",
   Bomber = "Bomber",
   ManaBoost = "Mana Boost",
+  ElectricBlast = "Electric Blast",
+  None = "None"
 }
 
 function useUniqueAbility(card: MagicCard, currentPlayer: Player, opponent: Player): [Player, Player] {
@@ -21,7 +24,8 @@ function useUniqueAbility(card: MagicCard, currentPlayer: Player, opponent: Play
 
   switch (ability) {
     case UniqueAbility.Fireball:
-      newOpponent.health -= 5;
+      if (opponent.shield){newOpponent.shield = false;}
+      else {newOpponent.health -= 5};
       break;
     case UniqueAbility.Heal:
       newCurrentPlayer.health += 5;
@@ -87,218 +91,6 @@ export function makeCharacter() {
   ]
   return styles[Math.floor(Math.random() * styles.length)]().toDataUri();
 }
-
-// Adding more cards to the allCards array
-const allCards: MagicCard[] = [
-  {
-    name: "Tio",
-    image: makeCharacter(),
-    damage: 7,
-    realHealth: 3,
-    health: 3,
-    uniqueAbility: UniqueAbility.Fireball,
-  },
-  {
-    name: "Aviv",
-    image: makeCharacter(),
-    damage: 0,
-    realHealth: 10,
-    health: 10,
-    uniqueAbility: UniqueAbility.Poison,
-  },
-  {
-    name: "Ariel",
-    image: makeCharacter(),
-    damage: 3,
-    realHealth: 8,
-    health: 8,
-    uniqueAbility: UniqueAbility.Shield,
-  },
-  {
-    name: "Ori",
-    image: makeCharacter(),
-    damage: 5,
-    realHealth: 10,
-    health: 10,
-    uniqueAbility: UniqueAbility.ManaBoost,
-  },
-  {
-    name: "Tal",
-    image: makeCharacter(),
-    damage: 0,
-    realHealth: 20,
-    health: 20,
-    uniqueAbility: UniqueAbility.Bomber,
-  },
-  {
-    name: "Yoshihara",
-    image: makeCharacter(),
-    damage: 5,
-    realHealth: 5,
-    health: 5,
-    uniqueAbility: UniqueAbility.ManaBoost,
-  },
-  {
-    name: "Iran",
-    image: makeCharacter(),
-    damage: 3,
-    realHealth: 2,
-    health: 2,
-    uniqueAbility: UniqueAbility.Fireball,
-  },
-  {
-    name: "Eshel",
-    image: makeCharacter(),
-    damage: 3,
-    realHealth: 7,
-    health: 7,
-    uniqueAbility: UniqueAbility.Heal,
-  },
-  {
-    name: "Amos",
-    image: makeCharacter(),
-    damage: 2,
-    realHealth: 10,
-    health: 10,
-    uniqueAbility: UniqueAbility.Shield,
-  },
-  {
-    name: "Toxic Alchemist",
-    image: makeCharacter(),
-    damage: 4,
-    realHealth: 3,
-    health: 3,
-    uniqueAbility: UniqueAbility.Poison,
-  },
-  {
-    name: "Dual-Blade Warrior",
-    image: makeCharacter(),
-    damage: 6,
-    realHealth: 5,
-    health: 5,
-    uniqueAbility: UniqueAbility.Poison,
-  },
-  {
-    name: "Mana Spirit",
-    image: makeCharacter(),
-    damage: 3,
-    realHealth: 4,
-    health: 4,
-    uniqueAbility: UniqueAbility.ManaBoost,
-  },
-  {
-    name: "Gurdian Angel",
-    image: makeCharacter(),
-    damage: 0,
-    realHealth: 13,
-    health: 13,
-    uniqueAbility: UniqueAbility.Heal,
-  },
-  {
-    name: "Tio",
-    image: makeCharacter(),
-    damage: 7,
-    realHealth: 3,
-    health: 3,
-    uniqueAbility: UniqueAbility.Fireball,
-  },
-  {
-    name: "Aviv",
-    image: makeCharacter(),
-    damage: 0,
-    realHealth: 10,
-    health: 10,
-    uniqueAbility: UniqueAbility.Poison,
-  },
-  {
-    name: "Ariel",
-    image: makeCharacter(),
-    damage: 3,
-    realHealth: 8,
-    health: 8,
-    uniqueAbility: UniqueAbility.Shield,
-  },
-  {
-    name: "Ori",
-    image: makeCharacter(),
-    damage: 5,
-    realHealth: 10,
-    health: 10,
-    uniqueAbility: UniqueAbility.ManaBoost,
-  },
-  {
-    name: "Tal",
-    image: makeCharacter(),
-    damage: 0,
-    realHealth: 20,
-    health: 20,
-    uniqueAbility: UniqueAbility.Bomber,
-  },
-  {
-    name: "Yoshihara",
-    image: makeCharacter(),
-    damage: 5,
-    realHealth: 5,
-    health: 5,
-    uniqueAbility: UniqueAbility.ManaBoost,
-  },
-  {
-    name: "Iran",
-    image: makeCharacter(),
-    damage: 3,
-    realHealth: 2,
-    health: 2,
-    uniqueAbility: UniqueAbility.Fireball,
-  },
-  {
-    name: "Eshel",
-    image: makeCharacter(),
-    damage: 3,
-    realHealth: 7,
-    health: 7,
-    uniqueAbility: UniqueAbility.Heal,
-  },
-  {
-    name: "Amos",
-    image: makeCharacter(),
-    damage: 2,
-    realHealth: 10,
-    health: 10,
-    uniqueAbility: UniqueAbility.Shield,
-  },
-  {
-    name: "Toxic Alchemist",
-    image: makeCharacter(),
-    damage: 4,
-    realHealth: 3,
-    health: 3,
-    uniqueAbility: UniqueAbility.Poison,
-  },
-  {
-    name: "Dual-Blade Warrior",
-    image: makeCharacter(),
-    damage: 6,
-    realHealth: 5,
-    health: 5,
-    uniqueAbility: UniqueAbility.Poison,
-  },
-  {
-    name: "Mana Spirit",
-    image: makeCharacter(),
-    damage: 3,
-    realHealth: 4,
-    health: 4,
-    uniqueAbility: UniqueAbility.ManaBoost,
-  },
-  {
-    name: "Gurdian Angel",
-    image: makeCharacter(),
-    damage: 0,
-    realHealth: 13,
-    health: 13,
-    uniqueAbility: UniqueAbility.Heal,
-  }
-];
 let usedCards: MagicCard[] = [];
 
 const makeDeck = (deckCards: number): MagicCard[] => {
@@ -412,7 +204,7 @@ export function DeadPlayerZone({ player, isTurn, onChoiceAction }: { player: Pla
 
 const attack = (card: MagicCard, player: Player) => {
   let damage = Math.max(card.damage - (player.mana || 0), 0);
-  if (player.mana){player.mana -= 1;if (player.mana <= 0) {player.mana = undefined;}}
+  if (player.mana){player.mana -= (card.damage / 3);if (player.mana <= 0) {player.mana = undefined;}}
   if (player.activeCards.length == 0){
     if (player.shield){
       player.shield = false;
