@@ -34,7 +34,7 @@ function useUniqueAbility(card: MagicCard, currentPlayer: Player, opponent: Play
       break;
     case UniqueAbility.ManaBoost:
       // Mana increses damage
-      newCurrentPlayer.mana = Math.min((newCurrentPlayer.mana || 0) + 3, 15);
+      newCurrentPlayer.mana = Math.min((newCurrentPlayer.mana || 0) + 5, 15);
       break;
     case UniqueAbility.ElectricBlast:
       if (newOpponent.shield){newOpponent.shield = false;}
@@ -201,7 +201,7 @@ export function DeadPlayerZone({ player, isTurn, onChoiceAction }: { player: Pla
 
 const attack = (card: MagicCard, player: Player) => {
   let damage = Math.max(card.damage - (player.mana || 0), 0);
-  if (player.mana){player.mana -= (card.damage / 3);if (player.mana <= 0) {player.mana = undefined;}}
+  if (player.mana){player.mana -= (card.damage);if (player.mana <= 0) {player.mana = undefined;}}
   if (player.activeCards.length == 0){
     if (player.shield){
       player.shield = false;
@@ -244,9 +244,7 @@ export function MagicCard() {
   useEffect(() => {
     setAddedCard(false);
     if (player1.poisonCounter){setPlayer1({...player1, health: player1.health - 2, poisonCounter: player1.poisonCounter - 1});}
-    if (player1.mana){setPlayer1({...player1, mana: player1.mana - 0.5});}
     if (player2.poisonCounter){setPlayer2({...player2, health: player2.health - 2, poisonCounter: player2.poisonCounter - 1});}
-    if (player2.mana){setPlayer2({...player2, mana: player2.mana - 0.5});}
     if (player1.health <= 0 || player2.health <= 0){
       setGameOver(true);
     }
