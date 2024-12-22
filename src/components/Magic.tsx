@@ -17,7 +17,7 @@ function useUniqueAbility(card: MagicCard, currentPlayer: Player, opponent: Play
       else {newOpponent.health -= 5};
       break;
     case UniqueAbility.Heal:
-      newCurrentPlayer.health += 5;
+      newCurrentPlayer.health = Math.min(newCurrentPlayer.health + 5, 100);
       break;
     case UniqueAbility.Shield:
       // Shield Stops the next attack
@@ -34,12 +34,12 @@ function useUniqueAbility(card: MagicCard, currentPlayer: Player, opponent: Play
       break;
     case UniqueAbility.ManaBoost:
       // Mana increses damage
-      newCurrentPlayer.mana = Math.min((newCurrentPlayer.mana || 0) + 5, 15);
+      newCurrentPlayer.mana = Math.min((newCurrentPlayer.mana || 0) + 4, 15);
       break;
     case UniqueAbility.ElectricBlast:
       if (newOpponent.shield){newOpponent.shield = false;}
-      else if (newOpponent.mana && newOpponent.mana > 0) {newOpponent.mana -= Math.max(newOpponent.activeCards.length, 0);}
-      else {
+      else if (newOpponent.mana && newOpponent.mana > 0) {newOpponent.mana -= Math.max(6, 0);}
+      if (!newOpponent.mana || newOpponent.mana < 1) {
         newOpponent.activeCards.forEach((card) => {
           card.health -= 2;
         });
