@@ -47,6 +47,14 @@ function useUniqueAbility(card: MagicCard, currentPlayer: Player, opponent: Play
       // Mana increses damage
       newCurrentPlayer.mana = Math.min((newCurrentPlayer.mana || 0) + 3, 15);
       break;
+    case UniqueAbility.ElectricBlast:
+      if (newOpponent.shield){newOpponent.shield = false;}
+      else {
+        newOpponent.activeCards.forEach((card) => card.health -= 2);
+      }
+      break;
+    case UniqueAbility.None:
+      break;
     default:
       throw new Error('Unknown ability');
   }
