@@ -1,5 +1,7 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
+import { createAvatar } from '@dicebear/core';
+import { adventurer, shapes, croodles, croodlesNeutral, funEmoji, adventurerNeutral, avataaars, avataaarsNeutral, openPeeps, bottts, botttsNeutral } from '@dicebear/collection';
 import idle from '@/images/Character/Jump (32x32).png';
 
 class Player {
@@ -15,6 +17,7 @@ class Player {
     abilityCooldown: boolean;
     abiltyCooldownTime: number;
     lastAbility: number;
+    shooting: boolean;
 
     constructor(x: number, y: number, width: number, height: number) {
         this.position = { x, y };
@@ -27,6 +30,7 @@ class Player {
         this.gameOver = false;
         this.isGrounded = false;
         this.abilityCooldown = false;
+        this.shooting = false;
         this.abiltyCooldownTime = 3000;
         this.lastAbility = 0;
     }
@@ -128,7 +132,29 @@ class Player {
         ctx.drawImage(image, this.position.x, this.position.y, this.width, this.height);
     }
 }
+class Enemy{
+    position: { x: number; y: number };
+    width: number;
+    height: number;
+    speed: number;
 
+    constructor(x: number, y: number, width: number, height: number, speed: number) {
+        this.position = { x, y };
+        this.width = width;
+        this.height = height;
+        this.speed = speed;
+    }
+
+    update(player: Player) {
+        this.position.x -= this.speed;
+
+    }
+    
+    draw(ctx: CanvasRenderingContext2D) {
+        ctx.fillStyle = "red";
+        ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+    }
+}
 class Platform {
     position: { x: number; y: number };
     width: number;
@@ -215,6 +241,28 @@ class Obstacle {
         ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
     }
 }
+class Bullet {
+    position: { x: number, y: number };
+    speed: number;
+    width: number;
+    height: number;
+
+    constructor(x: number, y: number, speed: number, width: number, height: number) {
+        this.position = { x, y };
+        this.speed = speed;
+        this.width = width;
+        this.height = height;
+    }
+
+    update(player: Player) {
+        this.position.x += this.speed;
+    }
+
+    draw(ctx: CanvasRenderingContext2D) {
+        ctx.fillStyle = "blue";
+        ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+    }
+}
 
 const DinoChicken = () => {
     const [isClient, setIsClient] = useState(false);
@@ -229,10 +277,11 @@ const DinoChicken = () => {
     const obstacles = [new Obstacle(300, 300, 5, 50, 50), new Obstacle(400, 150, 2, 50, 50)];
     let platforms = [
         new JumpingPlatform(300, 300, 150, 20, 10),
-        new Platform(150, 600, 200, 20),
+        new Platform(150, 600, 2000, 20),
         new MovingPlatform(500, 100, 100, 20, { x: 5, y: 0 }),
         new Platform(100, 500, 200, 20),
     ];
+    const bullets: Bullet[] = [];
 
     const updatePlatforms = () => {
         let playerX = player.position.x;
@@ -265,7 +314,7 @@ const DinoChicken = () => {
     
             if (ctx) {
                 ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-                updatePlatforms();
+                // updatePlatforms();
                 if (!player.gameOver) {
                     player.update(platforms, obstacles);
                     player.draw(ctx);
@@ -277,8 +326,17 @@ const DinoChicken = () => {
                         else if (platform instanceof JumpingPlatform) {
                             platform.update(player);
                         }
+                    
                 });
-    
+                for (let i = bullets.length - 1; i >= 0; i--) {
+                    const bullet = bullets[i];
+                    bullet.update(player);
+                    bullet.draw(ctx);
+
+                    if (bullet.position.x > window.innerWidth) {
+                        bullets.splice(i, 1);
+                    }
+                }
                 obstacles.forEach((obstacle) => {
                     obstacle.update();
                     obstacle.draw(ctx);
@@ -327,6 +385,9 @@ const DinoChicken = () => {
         }
         if (event.key === "q"){
             player.dash();
+        }
+        if (event.key === "e"){
+           bullets.push(new Bullet(player.position.x + player.width, (player.position.y + player.height / 2) - 5, 10, 10, 10))
         }
     };
 
