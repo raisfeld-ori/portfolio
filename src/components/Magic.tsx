@@ -51,13 +51,13 @@ function useUniqueAbility(card: MagicCard, currentPlayer: Player, opponent: Play
           })
           newCurrentPlayer.counter = false;
         }
-        newOpponent.activeCards.filter((card) => card.health > 0);
+        newOpponent.activeCards = newOpponent.activeCards.filter((card) => card.health > 0);
       }
       break;
     case UniqueAbility.Copy:
       if (!lastUniqueAbility){break;}
-      let cardCopy = { ...card, uniqueAbility: lastUniqueAbility };
-      useUniqueAbility(cardCopy, newCurrentPlayer, newOpponent, lastUniqueAbility);
+      //let cardCopy = { ...card, uniqueAbility: lastUniqueAbility };
+      //useUniqueAbility(cardCopy, newCurrentPlayer, newOpponent, lastUniqueAbility);
     case UniqueAbility.None:
       break;
     case UniqueAbility.Counter:
