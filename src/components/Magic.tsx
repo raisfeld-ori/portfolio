@@ -6,7 +6,7 @@ import { adventurer, shapes, croodles, croodlesNeutral, funEmoji, adventurerNeut
 import Image from 'next/image';
 import { allCards, UniqueAbility } from './characters';
 
-function useUniqueAbility(card: MagicCard, currentPlayer: Player, opponent: Player): [Player, Player] {
+function useUniqueAbility(card: MagicCard, currentPlayer: Player, opponent: Player, lastUniqueAbility: UniqueAbility | null): [Player, Player] {
   let newCurrentPlayer = { ...currentPlayer };
   let newOpponent = { ...opponent };
   let ability = card.uniqueAbility;
@@ -15,6 +15,7 @@ function useUniqueAbility(card: MagicCard, currentPlayer: Player, opponent: Play
     case UniqueAbility.Fireball:
       if (opponent.shield){newOpponent.shield = false;}
       else {newOpponent.health -= 5};
+      if (newOpponent.counter) {newCurrentPlayer.health -= 2; newOpponent.counter = false;}
       break;
     case UniqueAbility.Heal:
       newCurrentPlayer.health = Math.min(newCurrentPlayer.health + 5, 100);
@@ -38,18 +39,36 @@ function useUniqueAbility(card: MagicCard, currentPlayer: Player, opponent: Play
       break;
     case UniqueAbility.ElectricBlast:
       if (newOpponent.shield){newOpponent.shield = false;}
-      else if (newOpponent.mana && newOpponent.mana > 0) {newOpponent.mana -= Math.max(6, 0);}
+      else if (newOpponent.mana && newOpponent.mana > 0) {newOpponent.mana -= newOpponent.activeCards.length; if (newOpponent.mana <= 0) {newOpponent.mana = undefined;}}
       if (!newOpponent.mana || newOpponent.mana < 1) {
         newOpponent.activeCards.forEach((card) => {
           card.health -= 2;
         });
-        newOpponent.activeCards.filter((card) => card.health > 0);
+
+        if (newOpponent.counter){
+          newCurrentPlayer.activeCards.forEach((card) => {
+            card.health -= 1;
+          })
+          newCurrentPlayer.counter = false;
+        }
+        newOpponent.activeCards = newOpponent.activeCards.filter((card) => card.health > 0);
       }
       break;
+    case UniqueAbility.Copy:
+      if (!lastUniqueAbility){break;}
+      //let cardCopy = { ...card, uniqueAbility: lastUniqueAbility };
+      //useUniqueAbility(cardCopy, newCurrentPlayer, newOpponent, lastUniqueAbility);
     case UniqueAbility.None:
+      break;
+    case UniqueAbility.Counter:
+      newCurrentPlayer.counter = true;
       break;
     default:
       throw new Error('Unknown ability');
+  }
+  lastUniqueAbility = ability;
+  if (ability === UniqueAbility.Copy) {
+    lastUniqueAbility = null;
   }
   return [newCurrentPlayer, newOpponent];
 }
@@ -63,6 +82,7 @@ export interface Player {
   shield?: boolean;
   poisonCounter?: number;
   mana?: number;
+  counter?: boolean;
   activeCards: MagicCard[];
 }
 
@@ -95,11 +115,17 @@ export function makeCharacter() {
 let usedCards: MagicCard[] = [];
 
 const makeDeck = (deckCards: number): MagicCard[] => {
-  return Array.from({ length: deckCards }, () => {
+  const deck: MagicCard[] = [];
+  while (deck.length < deckCards) {
     const card = allCards[Math.floor(Math.random() * allCards.length)];
-    if (!usedCards.includes(card)){usedCards.push(card);return card;}
-  }).filter((c) => !!c) as MagicCard[];
-}
+    if (!usedCards.includes(card)) {
+      usedCards.push(card);
+      deck.push(card);
+    }
+  }
+  return deck;
+};
+
 
 const Card = ({ card, className, handleSelect } : { card: MagicCard, className?: string, handleSelect?: () => void }) => {
   return (
@@ -137,7 +163,7 @@ export function PlayerZone({ player, isTurn, onChoiceAction }: { player: Player,
             className="rounded-full"
           />
           <div className="flex-1">
-            <h2 className="text-2xl font-bold">{player.name} ({player.shield && '🛡️'}{player.poisonCounter && player.poisonCounter != 0 && ('🤢')}{player.mana && player.mana != 0 && '🌟'})</h2>
+            <h2 className="text-2xl font-bold">{player.name} ({player.shield && '🛡️'}{player.poisonCounter && player.poisonCounter != 0 && ('🤢')}{player.mana && player.mana != 0 && '🌟'} {player.counter && '🗡️'})</h2>
             <div className="flex items-center space-x-2">
               <div className="w-full bg-gray-300 rounded-full h-2.5">
                 <div 
@@ -177,7 +203,7 @@ export function DeadPlayerZone({ player, isTurn, onChoiceAction }: { player: Pla
             className="rounded-full"
           /> : <p className='text-4xl rounded-full'>💀</p>}
           <div className="flex-1">
-            <h2 className="text-2xl font-bold">{player.name} ({player.shield && '🛡️'}{player.poisonCounter && player.poisonCounter != 0 && ('🤢+' + player.poisonCounter)})</h2>
+            <h2 className="text-2xl font-bold">{player.name} ({player.shield && '🛡️'}{player.poisonCounter && player.poisonCounter != 0 && ('🤢+' + player.poisonCounter)} {player.counter && '🗡️'})</h2>
             <div className="flex items-center space-x-2">
               <div className="w-full bg-gray-300 rounded-full h-2.5">
                 <div 
@@ -242,6 +268,7 @@ export function MagicCard() {
     activeCards: []
   })
   const [turn, setTurn] = useState(player1);
+  let lastUniqueAbility = null;
   const [addedCard, setAddedCard] = useState<boolean>(false);
   const [gameOver, setGameOver] = useState(false);
   usedCards = [];
@@ -270,14 +297,14 @@ export function MagicCard() {
           <div className='flex flex-col md:flex-row'>
           <PlayerZone isTurn={turn.name === player1.name} onChoiceAction={(card) => {
             let AttackedPlayer2 = attack(card, player2);
-            let [newPlayer1, newPlayer2] = useUniqueAbility(card, player1, AttackedPlayer2);
+            let [newPlayer1, newPlayer2] = useUniqueAbility(card, player1, AttackedPlayer2, lastUniqueAbility);
             setPlayer1(newPlayer1);
             setPlayer2(newPlayer2);
             setTurn(turn.name === player1.name ? player2 : player1)
           }} player={player1}></PlayerZone>
           <PlayerZone isTurn={turn.name === player2.name} onChoiceAction={(card) => {
             let AttackedPlayer1 = attack(card, player1);
-            let [newPlayer2, newPlayer1] = useUniqueAbility(card, player2, AttackedPlayer1);
+            let [newPlayer2, newPlayer1] = useUniqueAbility(card, player2, AttackedPlayer1, lastUniqueAbility);
             setPlayer1(newPlayer1);
             setPlayer2(newPlayer2);
             setTurn(turn.name === player1.name ? player2 : player1)

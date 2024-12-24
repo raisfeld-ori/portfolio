@@ -8,6 +8,8 @@ export enum UniqueAbility {
   Bomber = "Bomber",
   ManaBoost = "Mana Boost",
   ElectricBlast = "Electric Blast",
+  Counter = "Counter",
+  Copy = "Copycat",
   None = "None"
 }
 
@@ -251,5 +253,21 @@ export const allCards: MagicCard[] = [
     realHealth: 15,
     health: 15,
     uniqueAbility: UniqueAbility.None,
+  },
+  {
+    name: "Segal",
+    image: makeCharacter(),
+    damage: 5,
+    realHealth: 8,
+    health: 8,
+    uniqueAbility: UniqueAbility.Counter,
+  },
+  {
+    name: "Elkaslasi",
+    image: makeCharacter(),
+    damage: 2,
+    realHealth: 8,
+    health: 8,
+    uniqueAbility: UniqueAbility.Copy,
   }
 ];
