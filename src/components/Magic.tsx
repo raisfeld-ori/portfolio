@@ -268,7 +268,7 @@ export function MagicCard() {
     activeCards: []
   })
   const [turn, setTurn] = useState(player1);
-  let lastUniqueAbility = null;
+  let lastUniqueAbility: UniqueAbility | null = null;
   const [addedCard, setAddedCard] = useState<boolean>(false);
   const [gameOver, setGameOver] = useState(false);
   usedCards = [];
