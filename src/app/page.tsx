@@ -159,10 +159,7 @@ function Resume() {
       title: 'fullstack developer',
       logo: tgi,
       start: '2024',
-      end: {
-        label: 'Present',
-        dateTime: new Date().getFullYear().toString(),
-      },
+      end: "2025",
     },
     {
       company: 'Israir',
