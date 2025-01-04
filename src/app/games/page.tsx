@@ -2,6 +2,7 @@ import { Container } from '@/components/Container'
 import { type Metadata } from 'next'
 import chessImage from '@/images/photos/Chess.png';
 import CardsImage from '@/images/photos/Cards.png';
+import AiRpg from '@/images/photos/ai rpg.png';
 import Image from 'next/image';
 
 
@@ -29,6 +30,13 @@ export default function About() {
           <Image alt='' className='h-full w-full blur-sm opacity-45' src={CardsImage}>
             </Image>
             <h3 className='text-center absolute w-64 -translate-y-32 text-2xl font-bold'>Magic Cards</h3>
+            </a>
+        </div>
+        <div className='h-64 w-64 m-5'>
+          <a href='/games/ai_rpg'>
+          <Image alt='' className='h-full w-full blur-sm opacity-45' src={AiRpg}>
+            </Image>
+            <h3 className='text-center absolute w-64 -translate-y-32 text-2xl font-bold'>AI RPG</h3>
             </a>
         </div>
       </div>
