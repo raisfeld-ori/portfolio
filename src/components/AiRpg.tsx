@@ -23,7 +23,7 @@ async function do_turn(decision: string, health: number, items: string[]) {
     You're given the following information:
     Player health, Player items, Player decision.
 
-    Use them to Decide next turn.
+    Use them to Decide next turn. Describe the action in detail, but don't add info like the player's new health or the enemy's new health.
 
     Example:
     Player health: 100
@@ -81,6 +81,7 @@ async function do_turn(decision: string, health: number, items: string[]) {
     const enemyPrompt = `
     You are part of an AI rpg game, your job is to describe how much health the enemy has.
     You're given the current enemies health and the last action, decide how much health did the enemy lose.
+    Respond with the exact number and no other content. Respond using a number only.
 
     Example:
     Health: 100
@@ -103,9 +104,10 @@ async function do_turn(decision: string, health: number, items: string[]) {
     return {message: result, health: newHealth, items: newItems, enemyHealth: newEnemyHealth};
 }
 
-function Enemy({enemy} : {enemy: string}) {
+function Enemy({enemy, health} : {enemy: string, health: number}) {
   return (
-    <div className="flex items-center justify-center">
+    <div className="flex items-center flex-col justify-center">
+        <p><strong>Enemy health: </strong>{health}</p>
       <Image 
         src={enemy} 
         alt="Enemy" 
@@ -138,6 +140,7 @@ function UserStats({ health, items }: UserStatsProps) {
         <h2 className="text-xl font-bold mb-2">Items</h2>
         <ul>
           {items.map((item, index) => (
+            item.trim() != "" &&
             <li key={index} className="flex items-center mb-2">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -245,11 +248,11 @@ export default function AiRpg() {
     setDisabled(true);
     const turn = await do_turn(action, health, items);
 
-    setHealth(prevHealth => Math.min(Math.max(0, turn.health), 100));
+    setHealth(Math.min(Math.max(0, turn.health), 100));
     setItems(turn.items)
 
     setModalContent({
-      health,
+      health: turn.health,
       items: turn.items,
       message: turn.message
     })
@@ -264,7 +267,7 @@ export default function AiRpg() {
           <UserStats health={health} items={items} />
         </div>
         <div className="flex-1 flex items-center justify-center">
-          <Enemy enemy={enemy}/>
+          <Enemy enemy={enemy} health={enemyHealth}/>
         </div>
       </div>
       <UserInput onSubmit={handleUserAction} disabled={disabled} />
