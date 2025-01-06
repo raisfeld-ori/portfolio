@@ -6,7 +6,7 @@ import { createAvatar } from '@dicebear/core';
 import { openPeeps } from '@dicebear/collection';
 
 // No way to use an API key 
-const genAI = new GoogleGenerativeAI("AIzaSyApnqTZt5NZTxBZ65T2-5xNPHxetPPfzHs");
+const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_API_KEY!);
 const model = genAI.getGenerativeModel({model: 'gemini-1.5-flash'});
 
 function create_enemy(){
@@ -73,6 +73,8 @@ async function do_turn(decision: string, health: number, items: string[]) {
     prompt: Player eats apple and heals a bit
     Result: banana,orange
 
+
+    Respond with "No items" if there's no items.
     Here's the current turn:
     items: ${items.join(', ')}
     prompt: ${result}
@@ -99,9 +101,9 @@ async function do_turn(decision: string, health: number, items: string[]) {
 
     const newEnemyHealth = Number((await callAI(enemyPrompt)).response.text());
 
-    const newItems = (await callAI(itemsPrompt)).response.text().split(",");
+    const newItems = (await callAI(itemsPrompt)).response.text();
 
-    return {message: result, health: newHealth, items: newItems, enemyHealth: newEnemyHealth};
+    return {message: result, health: newHealth, items: newItems == "No items" ? [] : newItems.split(','), enemyHealth: newEnemyHealth};
 }
 
 function Enemy({enemy, health} : {enemy: string, health: number}) {
