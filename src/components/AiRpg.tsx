@@ -4,9 +4,9 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { createAvatar } from '@dicebear/core';
 import { openPeeps } from '@dicebear/collection';
+import { key } from './key';
 
-// No way to use an API key 
-const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_API_KEY!);
+const genAI = new GoogleGenerativeAI(key);
 const model = genAI.getGenerativeModel({model: 'gemini-1.5-flash'});
 
 function create_enemy(){
