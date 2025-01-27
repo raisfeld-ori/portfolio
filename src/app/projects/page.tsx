@@ -7,6 +7,7 @@ import logoAnimaginary from '@/images/logos/israir.jpg'
 import logoCosmos from '@/images/logos/diddy2.png';
 import logoHelioStream from '@/images/logos/whitepanther.jpg'
 import logoOpenShuttle from '@/images/logos/google.png'
+import hibori2 from "@/images/logos/Hibori v2.png";
 import logoPlanetaria from '@/images/logos/icon.png'
 import ksed from '@/images/logos/ksed.png';
 
@@ -14,7 +15,7 @@ const projects = [
   {
     name: 'Hibori',
     description:
-      'Connecting Students to other students using shared hobbies and interests.',
+      'My First ever commertial project, with around 31 users, active for atleast a week each',
     link: { href: 'https://hiboridownloadplese.vercel.app/', label: 'Installation page' },
     logo: logoPlanetaria,
   },
@@ -33,8 +34,7 @@ const projects = [
   },
   {
     name: 'ReadySetStores',
-    description:
-      'A unique shop website with an admin page that allows the admin to completely design and customize the website',
+    description: "A website builder made by me and a friend. Contains a CMS, Editor, frontstore, and a custom application to design the website",
     link: { href: 'https://readysetstores.com/', label: 'readysetstores.com' },
     logo: logoCosmos,
   },
@@ -49,7 +49,13 @@ const projects = [
     description: 'A general purpose app with an OS-like feel and a large focus on security, in order to use OS features in a secure environment without needing to learn anything',
     logo: ksed,
     link: { href: 'https://github.com/raisfeld-ori/Ksed', label: 'Github page'}
-  }
+  },
+  {
+    name: "Hibori v2",
+    description: "A continuation of the previous project 'Hibori'. It has a 'softer' design that can be customized, and extended features, like an AI friend finder",
+    logo: hibori2,
+    link: { href: 'https://github.com/HiboriApp/Hibori-v2', label: 'Github page'}
+  },
 ]
 
 function LinkIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
