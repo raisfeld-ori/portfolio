@@ -28,6 +28,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="h-full antialiased" suppressHydrationWarning>
+      <head>
+      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5103433678055720"
+     crossOrigin="anonymous"></script>
+     <meta name="google-adsense-account" content="ca-pub-5103433678055720"></meta>
+      </head>
       <body className="flex h-full bg-zinc-50 dark:bg-black">
         <Analytics></Analytics>
         <Providers>
